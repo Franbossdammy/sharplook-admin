@@ -1,0 +1,196 @@
+{
+  "info": {
+    "name": "SharpLook Complete API - All 149 Endpoints",
+    "description": "Complete API collection with all features including subscription system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:5000/api/v1", "type": "string"},
+    {"key": "access_token", "value": "", "type": "string"},
+    {"key": "admin_token", "value": "", "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "Authentication (8 endpoints)",
+      "item": [
+        {"name": "Register", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"john@example.com\",\"phone\":\"+2348012345678\",\"password\":\"SecurePass123!\",\"isVendor\":false}"}, "url": {"raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"]}}},
+        {"name": "Login", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"john@example.com\",\"password\":\"SecurePass123!\"}"}, "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}}},
+        {"name": "Verify Email", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"token\":\"verification_token\"}"}, "url": {"raw": "{{base_url}}/auth/verify-email", "host": ["{{base_url}}"], "path": ["auth", "verify-email"]}}},
+        {"name": "Forgot Password", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"john@example.com\"}"}, "url": {"raw": "{{base_url}}/auth/forgot-password", "host": ["{{base_url}}"], "path": ["auth", "forgot-password"]}}},
+        {"name": "Reset Password", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"token\":\"reset_token\",\"password\":\"NewPass123!\"}"}, "url": {"raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"]}}},
+        {"name": "Refresh Token", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"refreshToken\":\"{{refresh_token}}\"}"}, "url": {"raw": "{{base_url}}/auth/refresh-token", "host": ["{{base_url}}"], "path": ["auth", "refresh-token"]}}},
+        {"name": "Logout", "request": {"method": "POST", "header": [], "url": {"raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"]}}},
+        {"name": "Resend Verification", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"email\":\"john@example.com\"}"}, "url": {"raw": "{{base_url}}/auth/resend-verification", "host": ["{{base_url}}"], "path": ["auth", "resend-verification"]}}}
+      ]
+    },
+    {
+      "name": "Subscriptions - NEW (7 endpoints)",
+      "description": "Vendor subscription management: In-Shop (₦5k/mo, 0%), Home Service (FREE, 10%), Both (₦5k/mo, 12%)",
+      "item": [
+        {"name": "Create In-Shop Subscription", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"type\":\"in_shop\"}"}, "url": {"raw": "{{base_url}}/subscriptions", "host": ["{{base_url}}"], "path": ["subscriptions"]}, "description": "₦5,000/month, 0% commission"}},
+        {"name": "Create Home Service Subscription", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"type\":\"home_service\"}"}, "url": {"raw": "{{base_url}}/subscriptions", "host": ["{{base_url}}"], "path": ["subscriptions"]}, "description": "FREE, 10% commission"}},
+        {"name": "Create Both Subscription", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"type\":\"both\"}"}, "url": {"raw": "{{base_url}}/subscriptions", "host": ["{{base_url}}"], "path": ["subscriptions"]}, "description": "₦5,000/month, 12% commission"}},
+        {"name": "Get My Subscription", "request": {"method": "GET", "header": [], "url": {"raw": "{{base_url}}/subscriptions/me", "host": ["{{base_url}}"], "path": ["subscriptions", "me"]}}},
+        {"name": "Pay Subscription", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"paymentReference\":\"SUB-PAY-123\"}"}, "url": {"raw": "{{base_url}}/subscriptions/:subscriptionId/pay", "host": ["{{base_url}}"], "path": ["subscriptions", ":subscriptionId", "pay"], "variable": [{"key": "subscriptionId", "value": ""}]}}},
+        {"name": "Update Subscription Type", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"type\":\"both\"}"}, "url": {"raw": "{{base_url}}/subscriptions/type", "host": ["{{base_url}}"], "path": ["subscriptions", "type"]}}},
+        {"name": "Cancel Subscription", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"reason\":\"No longer needed\"}"}, "url": {"raw": "{{base_url}}/subscriptions/cancel", "host": ["{{base_url}}"], "path": ["subscriptions", "cancel"]}}}
+      ]
+    },
+    {
+      "name": "Users (12 endpoints)",
+      "item": [
+        {"name": "Get My Profile", "request": {"method": "GET", "url": {"raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users", "me"]}}},
+        {"name": "Update Profile", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"firstName\":\"John\",\"lastName\":\"Doe\"}"}, "url": {"raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users", "me"]}}},
+        {"name": "Upload Avatar", "request": {"method": "POST", "body": {"mode": "formdata", "formdata": [{"key": "avatar", "type": "file", "src": ""}]}, "url": {"raw": "{{base_url}}/users/me/avatar", "host": ["{{base_url}}"], "path": ["users", "me", "avatar"]}}},
+        {"name": "Change Password", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"currentPassword\":\"Old123!\",\"newPassword\":\"New123!\"}"}, "url": {"raw": "{{base_url}}/users/me/password", "host": ["{{base_url}}"], "path": ["users", "me", "password"]}}},
+        {"name": "Setup Vendor Profile", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"businessName\":\"John Services\",\"businessDescription\":\"Professional\",\"serviceCategories\":[\"cat_id\"],\"location\":{\"coordinates\":[3.3792,6.5244],\"address\":\"Lagos\"}}"}, "url": {"raw": "{{base_url}}/users/vendor/setup", "host": ["{{base_url}}"], "path": ["users", "vendor", "setup"]}}},
+        {"name": "Get Wallet Balance", "request": {"method": "GET", "url": {"raw": "{{base_url}}/users/me/wallet", "host": ["{{base_url}}"], "path": ["users", "me", "wallet"]}}},
+        {"name": "Get User by ID", "request": {"method": "GET", "url": {"raw": "{{base_url}}/users/:userId", "host": ["{{base_url}}"], "path": ["users", ":userId"]}}},
+        {"name": "Search Users", "request": {"method": "GET", "url": {"raw": "{{base_url}}/users/search?query=john&page=1", "host": ["{{base_url}}"], "path": ["users", "search"]}}},
+        {"name": "Get All Users (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/users?page=1", "host": ["{{base_url}}"], "path": ["users"]}}},
+        {"name": "Update User (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"isActive\":true}"}, "url": {"raw": "{{base_url}}/users/:userId", "host": ["{{base_url}}"], "path": ["users", ":userId"]}}},
+        {"name": "Delete User (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "DELETE", "url": {"raw": "{{base_url}}/users/:userId", "host": ["{{base_url}}"], "path": ["users", ":userId"]}}},
+        {"name": "Verify Vendor (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "POST", "url": {"raw": "{{base_url}}/users/:userId/verify-vendor", "host": ["{{base_url}}"], "path": ["users", ":userId", "verify-vendor"]}}}
+      ]
+    },
+    {
+      "name": "Categories (8 endpoints)",
+      "item": [
+        {"name": "Get All Categories", "request": {"method": "GET", "url": {"raw": "{{base_url}}/categories?page=1&limit=20", "host": ["{{base_url}}"], "path": ["categories"]}}},
+        {"name": "Get Category by ID", "request": {"method": "GET", "url": {"raw": "{{base_url}}/categories/:categoryId", "host": ["{{base_url}}"], "path": ["categories", ":categoryId"]}}},
+        {"name": "Get Active Categories", "request": {"method": "GET", "url": {"raw": "{{base_url}}/categories/active", "host": ["{{base_url}}"], "path": ["categories", "active"]}}},
+        {"name": "Search Categories", "request": {"method": "GET", "url": {"raw": "{{base_url}}/categories/search?query=cleaning", "host": ["{{base_url}}"], "path": ["categories", "search"]}}},
+        {"name": "Create Category (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Home Cleaning\",\"description\":\"Professional cleaning\",\"icon\":\"cleaning\"}"}, "url": {"raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"]}}},
+        {"name": "Update Category (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Updated Name\"}"}, "url": {"raw": "{{base_url}}/categories/:categoryId", "host": ["{{base_url}}"], "path": ["categories", ":categoryId"]}}},
+        {"name": "Delete Category (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "DELETE", "url": {"raw": "{{base_url}}/categories/:categoryId", "host": ["{{base_url}}"], "path": ["categories", ":categoryId"]}}},
+        {"name": "Toggle Category Status (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "PATCH", "url": {"raw": "{{base_url}}/categories/:categoryId/toggle", "host": ["{{base_url}}"], "path": ["categories", ":categoryId", "toggle"]}}}
+      ]
+    },
+    {
+      "name": "Services (20 endpoints)",
+      "item": [
+        {"name": "Search Services", "request": {"method": "GET", "url": {"raw": "{{base_url}}/services/search?query=cleaning&city=Lagos&category=cat_id&minPrice=1000&maxPrice=50000&rating=4&page=1&limit=20", "host": ["{{base_url}}"], "path": ["services", "search"]}}},
+        {"name": "Get Service by ID", "request": {"method": "GET", "url": {"raw": "{{base_url}}/services/:serviceId", "host": ["{{base_url}}"], "path": ["services", ":serviceId"]}}},
+        {"name": "Get Service Reviews", "request": {"method": "GET", "url": {"raw": "{{base_url}}/services/:serviceId/reviews", "host": ["{{base_url}}"], "path": ["services", ":serviceId", "reviews"]}}},
+        {"name": "Get Nearby Services", "request": {"method": "GET", "url": {"raw": "{{base_url}}/services/nearby?latitude=6.5244&longitude=3.3792&maxDistance=10000", "host": ["{{base_url}}"], "path": ["services", "nearby"]}}},
+        {"name": "Get My Services", "request": {"method": "GET", "url": {"raw": "{{base_url}}/services/my-services?page=1", "host": ["{{base_url}}"], "path": ["services", "my-services"]}}},
+        {"name": "Create Service", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Home Cleaning\",\"description\":\"Professional cleaning\",\"category\":\"cat_id\",\"basePrice\":15000,\"priceType\":\"fixed\",\"currency\":\"NGN\",\"duration\":120,\"serviceArea\":{\"type\":\"Point\",\"coordinates\":[3.3792,6.5244],\"radius\":10000}}"}, "url": {"raw": "{{base_url}}/services", "host": ["{{base_url}}"], "path": ["services"]}}},
+        {"name": "Update Service", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Updated Service\",\"basePrice\":20000}"}, "url": {"raw": "{{base_url}}/services/:serviceId", "host": ["{{base_url}}"], "path": ["services", ":serviceId"]}}},
+        {"name": "Delete Service", "request": {"method": "DELETE", "url": {"raw": "{{base_url}}/services/:serviceId", "host": ["{{base_url}}"], "path": ["services", ":serviceId"]}}},
+        {"name": "Upload Service Images", "request": {"method": "POST", "body": {"mode": "formdata", "formdata": [{"key": "images", "type": "file", "src": ""}]}, "url": {"raw": "{{base_url}}/services/:serviceId/images", "host": ["{{base_url}}"], "path": ["services", ":serviceId", "images"]}}},
+        {"name": "Delete Service Image", "request": {"method": "DELETE", "url": {"raw": "{{base_url}}/services/:serviceId/images/:imageId", "host": ["{{base_url}}"], "path": ["services", ":serviceId", "images", ":imageId"]}}}
+      ]
+    },
+    {
+      "name": "Bookings (20 endpoints)",
+      "description": "Commission calculated based on vendor's subscription type",
+      "item": [
+        {"name": "Create Standard Booking", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"service\":\"service_id\",\"bookingType\":\"standard\",\"scheduledDate\":\"2025-11-15T10:00:00Z\",\"location\":{\"type\":\"Point\",\"coordinates\":[3.3792,6.5244],\"address\":\"Lagos\"}}"}, "url": {"raw": "{{base_url}}/bookings", "host": ["{{base_url}}"], "path": ["bookings"]}}},
+        {"name": "Send Offer", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"vendor\":\"vendor_id\",\"service\":\"service_id\",\"proposedPrice\":25000,\"proposedDate\":\"2025-11-15T10:00:00Z\",\"message\":\"Available on Monday\",\"location\":{\"type\":\"Point\",\"coordinates\":[3.3792,6.5244],\"address\":\"Lagos\"}}"}, "url": {"raw": "{{base_url}}/bookings/send-offer", "host": ["{{base_url}}"], "path": ["bookings", "send-offer"]}}},
+        {"name": "Get My Bookings", "request": {"method": "GET", "url": {"raw": "{{base_url}}/bookings?page=1&limit=20&status=pending", "host": ["{{base_url}}"], "path": ["bookings"]}}},
+        {"name": "Get Booking by ID", "request": {"method": "GET", "url": {"raw": "{{base_url}}/bookings/:bookingId", "host": ["{{base_url}}"], "path": ["bookings", ":bookingId"]}}},
+        {"name": "Accept Booking", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"action\":\"accept\",\"message\":\"I'll be there!\"}"}, "url": {"raw": "{{base_url}}/bookings/:bookingId/respond", "host": ["{{base_url}}"], "path": ["bookings", ":bookingId", "respond"]}}},
+        {"name": "Reject Booking", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"action\":\"reject\",\"message\":\"Not available\"}"}, "url": {"raw": "{{base_url}}/bookings/:bookingId/respond", "host": ["{{base_url}}"], "path": ["bookings", ":bookingId", "respond"]}}},
+        {"name": "Start Service", "request": {"method": "POST", "url": {"raw": "{{base_url}}/bookings/:bookingId/start", "host": ["{{base_url}}"], "path": ["bookings", ":bookingId", "start"]}}},
+        {"name": "Complete Booking", "request": {"method": "POST", "url": {"raw": "{{base_url}}/bookings/:bookingId/complete", "host": ["{{base_url}}"], "path": ["bookings", ":bookingId", "complete"]}}},
+        {"name": "Cancel Booking", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"reason\":\"Unable to attend\"}"}, "url": {"raw": "{{base_url}}/bookings/:bookingId/cancel", "host": ["{{base_url}}"], "path": ["bookings", ":bookingId", "cancel"]}}},
+        {"name": "Counter Offer", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"counterPrice\":30000,\"message\":\"Best price I can offer\"}"}, "url": {"raw": "{{base_url}}/bookings/:bookingId/counter-offer", "host": ["{{base_url}}"], "path": ["bookings", ":bookingId", "counter-offer"]}}}
+      ]
+    },
+    {
+      "name": "Payments (15 endpoints)",
+      "description": "Commission calculated based on vendor subscription: 0%, 10%, or 12%",
+      "item": [
+        {"name": "Initialize Payment", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"booking\":\"booking_id\",\"amount\":15000}"}, "url": {"raw": "{{base_url}}/payments/initialize", "host": ["{{base_url}}"], "path": ["payments", "initialize"]}, "description": "Commission auto-calculated from vendor subscription"}},
+        {"name": "Verify Payment", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"reference\":\"paystack_ref\"}"}, "url": {"raw": "{{base_url}}/payments/verify", "host": ["{{base_url}}"], "path": ["payments", "verify"]}}},
+        {"name": "Get My Payments", "request": {"method": "GET", "url": {"raw": "{{base_url}}/payments/my-payments?page=1&limit=20", "host": ["{{base_url}}"], "path": ["payments", "my-payments"]}}},
+        {"name": "Get Payment by ID", "request": {"method": "GET", "url": {"raw": "{{base_url}}/payments/:paymentId", "host": ["{{base_url}}"], "path": ["payments", ":paymentId"]}}},
+        {"name": "Request Withdrawal", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"amount\":50000,\"bankDetails\":{\"accountNumber\":\"0123456789\",\"accountName\":\"John Doe\",\"bankName\":\"GTBank\",\"bankCode\":\"058\"}}"}, "url": {"raw": "{{base_url}}/payments/withdraw", "host": ["{{base_url}}"], "path": ["payments", "withdraw"]}}},
+        {"name": "Get My Withdrawals", "request": {"method": "GET", "url": {"raw": "{{base_url}}/payments/my-withdrawals?page=1", "host": ["{{base_url}}"], "path": ["payments", "my-withdrawals"]}}},
+        {"name": "Get Transaction History", "request": {"method": "GET", "url": {"raw": "{{base_url}}/payments/transactions?page=1", "host": ["{{base_url}}"], "path": ["payments", "transactions"]}}}
+      ]
+    },
+    {
+      "name": "Disputes (11 endpoints)",
+      "item": [
+        {"name": "Create Dispute", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"booking\":\"booking_id\",\"category\":\"service_quality\",\"description\":\"Service not completed as agreed\",\"requestedResolution\":\"full_refund\"}"}, "url": {"raw": "{{base_url}}/disputes", "host": ["{{base_url}}"], "path": ["disputes"]}}},
+        {"name": "Get My Disputes", "request": {"method": "GET", "url": {"raw": "{{base_url}}/disputes?page=1", "host": ["{{base_url}}"], "path": ["disputes"]}}},
+        {"name": "Get Dispute by ID", "request": {"method": "GET", "url": {"raw": "{{base_url}}/disputes/:disputeId", "host": ["{{base_url}}"], "path": ["disputes", ":disputeId"]}}},
+        {"name": "Add Evidence", "request": {"method": "POST", "body": {"mode": "formdata", "formdata": [{"key": "files", "type": "file"}, {"key": "description", "value": "Evidence photos"}]}, "url": {"raw": "{{base_url}}/disputes/:disputeId/evidence", "host": ["{{base_url}}"], "path": ["disputes", ":disputeId", "evidence"]}}},
+        {"name": "Respond to Dispute", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"message\":\"I completed the work as agreed\"}"}, "url": {"raw": "{{base_url}}/disputes/:disputeId/respond", "host": ["{{base_url}}"], "path": ["disputes", ":disputeId", "respond"]}}},
+        {"name": "Resolve Dispute (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"resolution\":\"partial_refund\",\"refundAmount\":7500,\"adminNotes\":\"Both parties responsible\"}"}, "url": {"raw": "{{base_url}}/disputes/:disputeId/resolve", "host": ["{{base_url}}"], "path": ["disputes", ":disputeId", "resolve"]}}}
+      ]
+    },
+    {
+      "name": "Reviews (13 endpoints)",
+      "item": [
+        {"name": "Create Review", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"booking\":\"booking_id\",\"reviewee\":\"vendor_id\",\"reviewerType\":\"client\",\"rating\":5,\"comment\":\"Excellent service!\",\"detailedRatings\":{\"quality\":5,\"timeliness\":5,\"communication\":5,\"professionalism\":5,\"valueForMoney\":5}}"}, "url": {"raw": "{{base_url}}/reviews", "host": ["{{base_url}}"], "path": ["reviews"]}}},
+        {"name": "Get My Reviews", "request": {"method": "GET", "url": {"raw": "{{base_url}}/reviews/my-reviews?page=1", "host": ["{{base_url}}"], "path": ["reviews", "my-reviews"]}}},
+        {"name": "Get Service Reviews", "request": {"method": "GET", "url": {"raw": "{{base_url}}/reviews/service/:serviceId?page=1", "host": ["{{base_url}}"], "path": ["reviews", "service", ":serviceId"]}}},
+        {"name": "Get User Reviews", "request": {"method": "GET", "url": {"raw": "{{base_url}}/reviews/user/:userId?page=1", "host": ["{{base_url}}"], "path": ["reviews", "user", ":userId"]}}},
+        {"name": "Respond to Review", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"response\":\"Thank you for your feedback!\"}"}, "url": {"raw": "{{base_url}}/reviews/:reviewId/respond", "host": ["{{base_url}}"], "path": ["reviews", ":reviewId", "respond"]}}}
+      ]
+    },
+    {
+      "name": "Chat (9 endpoints)",
+      "item": [
+        {"name": "Create/Get Conversation", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"otherUserId\":\"user_id\",\"bookingId\":\"booking_id\"}"}, "url": {"raw": "{{base_url}}/chat/conversations", "host": ["{{base_url}}"], "path": ["chat", "conversations"]}}},
+        {"name": "Get My Conversations", "request": {"method": "GET", "url": {"raw": "{{base_url}}/chat/conversations?page=1", "host": ["{{base_url}}"], "path": ["chat", "conversations"]}}},
+        {"name": "Get Conversation Messages", "request": {"method": "GET", "url": {"raw": "{{base_url}}/chat/conversations/:conversationId/messages?page=1", "host": ["{{base_url}}"], "path": ["chat", "conversations", ":conversationId", "messages"]}}},
+        {"name": "Send Text Message", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"text\":\"Hello! When will you arrive?\",\"messageType\":\"text\"}"}, "url": {"raw": "{{base_url}}/chat/conversations/:conversationId/messages", "host": ["{{base_url}}"], "path": ["chat", "conversations", ":conversationId", "messages"]}}},
+        {"name": "Send Image", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"messageType\":\"image\",\"attachments\":[{\"url\":\"https://cloudinary.com/image.jpg\",\"type\":\"image\",\"name\":\"photo.jpg\",\"size\":245760}]}"}, "url": {"raw": "{{base_url}}/chat/conversations/:conversationId/messages", "host": ["{{base_url}}"], "path": ["chat", "conversations", ":conversationId", "messages"]}}},
+        {"name": "Mark as Read", "request": {"method": "PUT", "url": {"raw": "{{base_url}}/chat/conversations/:conversationId/read", "host": ["{{base_url}}"], "path": ["chat", "conversations", ":conversationId", "read"]}}},
+        {"name": "Delete Message", "request": {"method": "DELETE", "url": {"raw": "{{base_url}}/chat/messages/:messageId", "host": ["{{base_url}}"], "path": ["chat", "messages", ":messageId"]}}},
+        {"name": "Get Unread Count", "request": {"method": "GET", "url": {"raw": "{{base_url}}/chat/unread-count", "host": ["{{base_url}}"], "path": ["chat", "unread-count"]}}},
+        {"name": "Search Messages", "request": {"method": "GET", "url": {"raw": "{{base_url}}/chat/search?query=time&page=1", "host": ["{{base_url}}"], "path": ["chat", "search"]}}}
+      ]
+    },
+    {
+      "name": "Notifications (10 endpoints)",
+      "item": [
+        {"name": "Register Device (FCM)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"token\":\"fcm_device_token\",\"deviceType\":\"android\",\"deviceName\":\"Samsung Galaxy S21\"}"}, "url": {"raw": "{{base_url}}/notifications/register-device", "host": ["{{base_url}}"], "path": ["notifications", "register-device"]}}},
+        {"name": "Unregister Device", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"token\":\"fcm_device_token\"}"}, "url": {"raw": "{{base_url}}/notifications/unregister-device", "host": ["{{base_url}}"], "path": ["notifications", "unregister-device"]}}},
+        {"name": "Get Notifications", "request": {"method": "GET", "url": {"raw": "{{base_url}}/notifications?page=1&limit=20&isRead=false&type=booking", "host": ["{{base_url}}"], "path": ["notifications"]}}},
+        {"name": "Get Unread Count", "request": {"method": "GET", "url": {"raw": "{{base_url}}/notifications/unread-count", "host": ["{{base_url}}"], "path": ["notifications", "unread-count"]}}},
+        {"name": "Mark Notification as Read", "request": {"method": "PUT", "url": {"raw": "{{base_url}}/notifications/:notificationId/read", "host": ["{{base_url}}"], "path": ["notifications", ":notificationId", "read"]}}},
+        {"name": "Mark All as Read", "request": {"method": "PUT", "url": {"raw": "{{base_url}}/notifications/read-all", "host": ["{{base_url}}"], "path": ["notifications", "read-all"]}}},
+        {"name": "Delete Notification", "request": {"method": "DELETE", "url": {"raw": "{{base_url}}/notifications/:notificationId", "host": ["{{base_url}}"], "path": ["notifications", ":notificationId"]}}},
+        {"name": "Clear All Notifications", "request": {"method": "DELETE", "url": {"raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"]}}},
+        {"name": "Get Notification Settings", "request": {"method": "GET", "url": {"raw": "{{base_url}}/notifications/settings", "host": ["{{base_url}}"], "path": ["notifications", "settings"]}}},
+        {"name": "Update Notification Settings", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"notificationsEnabled\":true,\"emailNotifications\":false,\"pushNotifications\":true}"}, "url": {"raw": "{{base_url}}/notifications/settings", "host": ["{{base_url}}"], "path": ["notifications", "settings"]}}}
+      ]
+    },
+    {
+      "name": "Referrals (7 endpoints)",
+      "description": "Earn ₦1,000 for referrer + ₦500 for referee when first booking completes",
+      "item": [
+        {"name": "Apply Referral Code", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"referralCode\":\"JOHN2025\"}"}, "url": {"raw": "{{base_url}}/referrals/apply", "host": ["{{base_url}}"], "path": ["referrals", "apply"]}}},
+        {"name": "Get My Referral Stats", "request": {"method": "GET", "url": {"raw": "{{base_url}}/referrals/stats", "host": ["{{base_url}}"], "path": ["referrals", "stats"]}}},
+        {"name": "Get My Referrals", "request": {"method": "GET", "url": {"raw": "{{base_url}}/referrals/my-referrals?page=1&status=completed", "host": ["{{base_url}}"], "path": ["referrals", "my-referrals"]}}},
+        {"name": "Get Referral by ID", "request": {"method": "GET", "url": {"raw": "{{base_url}}/referrals/:referralId", "host": ["{{base_url}}"], "path": ["referrals", ":referralId"]}}},
+        {"name": "Get Leaderboard", "request": {"method": "GET", "url": {"raw": "{{base_url}}/referrals/leaderboard?limit=10", "host": ["{{base_url}}"], "path": ["referrals", "leaderboard"]}}},
+        {"name": "Get All Referrals (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/referrals?page=1&status=completed&startDate=2025-01-01", "host": ["{{base_url}}"], "path": ["referrals"]}}},
+        {"name": "Get Referral Stats (Admin)", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/referrals/admin/stats", "host": ["{{base_url}}"], "path": ["referrals", "admin", "stats"]}}}
+      ]
+    },
+    {
+      "name": "Analytics - Admin (9 endpoints)",
+      "item": [
+        {"name": "Dashboard Overview", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/dashboard", "host": ["{{base_url}}"], "path": ["analytics", "dashboard"]}}},
+        {"name": "User Analytics", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/users?startDate=2025-01-01&endDate=2025-12-31", "host": ["{{base_url}}"], "path": ["analytics", "users"]}}},
+        {"name": "Booking Analytics", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/bookings?startDate=2025-01-01", "host": ["{{base_url}}"], "path": ["analytics", "bookings"]}}},
+        {"name": "Revenue Analytics", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/revenue?startDate=2025-01-01", "host": ["{{base_url}}"], "path": ["analytics", "revenue"]}}},
+        {"name": "Vendor Performance", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/vendors?vendorId=vendor_id", "host": ["{{base_url}}"], "path": ["analytics", "vendors"]}}},
+        {"name": "Service Analytics", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/services", "host": ["{{base_url}}"], "path": ["analytics", "services"]}}},
+        {"name": "Dispute Analytics", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/disputes", "host": ["{{base_url}}"], "path": ["analytics", "disputes"]}}},
+        {"name": "Referral Analytics", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/referrals", "host": ["{{base_url}}"], "path": ["analytics", "referrals"]}}},
+        {"name": "Export Analytics", "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{admin_token}}"}]}, "method": "GET", "url": {"raw": "{{base_url}}/analytics/export/:type?startDate=2025-01-01", "host": ["{{base_url}}"], "path": ["analytics", "export", ":type"], "variable": [{"key": "type", "value": "bookings"}]}}}
+      ]
+    }
+  ]
+}
