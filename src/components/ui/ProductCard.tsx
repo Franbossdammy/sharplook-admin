@@ -8,7 +8,6 @@ import {
   Star,
   TrendingUp,
   ShoppingCart,
-  Clock,
   AlertCircle,
   User,
   BadgeCheck,
@@ -221,7 +220,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     {getSellerDisplayName()}
                   </p>
                   {isVerifiedVendor && (
-                    <BadgeCheck className="w-4 h-4 text-blue-600 flex-shrink-0" title="Verified Vendor" />
+                    <BadgeCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
                   )}
                 </div>
                 

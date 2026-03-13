@@ -6,7 +6,6 @@ import {
   DollarSign,
   MessageSquare,
   TrendingUp,
-  Settings,
   Star,
   Award,
   Package,

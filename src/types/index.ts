@@ -11,6 +11,72 @@ export interface User {
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
+  avatar?: string;
+  fullName?: string;
+  id?: string;
+  isEmailVerified?: boolean;
+  isPhoneVerified?: boolean;
+  isOnline?: boolean;
+  lastSeen?: string;
+  lastLogin?: string;
+  loginAttempts?: number;
+  walletBalance?: number;
+  referralCode?: string;
+  referredBy?: string | { _id: string };
+  hasWithdrawalPin?: boolean;
+  status?: string;
+  preferences?: Record<string, boolean>;
+  location?: {
+    type?: string;
+    coordinates?: [number, number];
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  vendorProfile?: {
+    businessName?: string;
+    businessDescription?: string;
+    vendorType?: string;
+    categories?: any[];
+    location?: {
+      type?: string;
+      coordinates?: [number, number];
+      address?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+    };
+    serviceRadius?: number;
+    rating?: number;
+    totalRatings?: number;
+    totalSales?: number;
+    completedBookings?: number;
+    availabilitySchedule?: {
+      monday: { isAvailable: boolean; from?: string; to?: string };
+      tuesday: { isAvailable: boolean; from?: string; to?: string };
+      wednesday: { isAvailable: boolean; from?: string; to?: string };
+      thursday: { isAvailable: boolean; from?: string; to?: string };
+      friday: { isAvailable: boolean; from?: string; to?: string };
+      saturday: { isAvailable: boolean; from?: string; to?: string };
+      sunday: { isAvailable: boolean; from?: string; to?: string };
+    };
+    documents?: {
+      idCard?: string;
+      businessLicense?: string;
+      certification?: string[];
+    };
+    isVerified?: boolean;
+    verificationStatus?: string;
+    verificationDate?: string;
+    businessPhone?: string;
+    businessAddress?: string;
+    redFlagCount?: number;
+    lastRedFlagAt?: string;
+    isSuspended?: boolean;
+    suspendedAt?: string;
+    suspensionReason?: string;
+  };
 }
 
 // Category Types
@@ -146,7 +212,11 @@ export interface ApiResponse<T> {
 
 export interface PaginatedResponse<T> {
   data: T[];
-  pagination: {
+  users?: T[];
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  pagination?: {
     page: number;
     limit: number;
     total: number;

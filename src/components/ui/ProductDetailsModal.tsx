@@ -1,8 +1,7 @@
 import React from 'react';
 import { 
-  X, 
-  Package, 
-  MapPin, 
+  X,
+  MapPin,
   Ruler, 
   Tag, 
   Truck, 
@@ -234,7 +233,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                           {getSellerDisplayName()}
                         </h4>
                         {isVerifiedVendor && (
-                          <BadgeCheck className="w-5 h-5 text-blue-600 flex-shrink-0" title="Verified Vendor" />
+                          <BadgeCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
                         )}
                       </div>
 

@@ -10,7 +10,6 @@ import {
   Clock,
   ChevronDown,
   X,
-  DollarSign,
   MapPin,
   Calendar,
   AlertCircle,

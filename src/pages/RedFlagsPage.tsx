@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Flag,
   AlertTriangle,
   Clock,
   User,
-  Calendar,
   MapPin,
   MessageSquare,
   DollarSign,
@@ -54,8 +52,6 @@ const getTypeIcon = (type: string) => {
 };
 
 export const RedFlagsPage: React.FC = () => {
-  const navigate = useNavigate();
-  
   // State
   const [flags, setFlags] = useState<RedFlag[]>([]);
   const [stats, setStats] = useState<RedFlagStats | null>(null);

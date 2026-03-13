@@ -294,7 +294,7 @@ export const OfferDetailsModal: React.FC<OfferDetailsModalProps> = ({ offer, isO
                     <p className="text-gray-600">No vendor responses yet</p>
                   </div>
                 ) : (
-                  offer.responses.map((response, index) => (
+                  offer.responses.map((response) => (
                     <div
                       key={response._id}
                       className={`p-4 rounded-lg border-2 ${

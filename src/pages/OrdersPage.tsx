@@ -11,9 +11,6 @@ import {
   AlertCircle,
   ChevronDown,
   X,
-  DollarSign,
-  User,
-  MapPin,
 } from 'lucide-react';
 import { orderService } from '../services/order.service';
 import { Order, OrderStatus, OrderFilters } from '../types/order.types';

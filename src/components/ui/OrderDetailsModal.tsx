@@ -4,13 +4,8 @@ import {
   Package,
   User,
   MapPin,
-  Calendar,
-  DollarSign,
   Truck,
-  CheckCircle,
   XCircle,
-  Clock,
-  AlertCircle,
   Edit,
 } from 'lucide-react';
 import { orderService } from '../../services/order.service';

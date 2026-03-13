@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
-  CheckCircle, 
+import {
+  Search,
+  CheckCircle,
   XCircle, 
   Clock, 
   AlertCircle,
@@ -85,18 +84,20 @@ export const ProductsPage: React.FC = () => {
     setSelectedProduct(null);
   };
 
-  const handleApprove = async (productId: string) => {
+  const handleApprove = async (productId: string): Promise<boolean> => {
     await approveProduct(productId);
     refetch();
     refetchPending();
-    refetchRejected(); // ✅ Refresh rejected list when approving
+    refetchRejected(); // Refresh rejected list when approving
+    return true;
   };
 
-  const handleReject = async (productId: string, reason: string) => {
+  const handleReject = async (productId: string, reason: string): Promise<boolean> => {
     await rejectProduct(productId, reason);
     refetch();
     refetchPending();
-    refetchRejected(); // ✅ Refresh rejected list when rejecting
+    refetchRejected(); // Refresh rejected list when rejecting
+    return true;
   };
 
   const handleFeatureClick = (productId: string) => {

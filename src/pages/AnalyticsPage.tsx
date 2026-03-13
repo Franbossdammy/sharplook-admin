@@ -340,7 +340,7 @@ export const AnalyticsPage: React.FC = () => {
                         fill="#8884d8"
                         dataKey="value"
                       >
-                        {userAnalytics.byRole.map((entry, index) => (
+                        {userAnalytics.byRole.map((_entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -422,7 +422,7 @@ export const AnalyticsPage: React.FC = () => {
                         fill="#8884d8"
                         dataKey="value"
                       >
-                        {bookingAnalytics.byStatus.map((entry, index) => (
+                        {bookingAnalytics.byStatus.map((_entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -595,7 +595,7 @@ export const AnalyticsPage: React.FC = () => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Most Booked Services</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {serviceAnalytics.mostBooked.slice(0, 6).map((service, index) => (
+                  {serviceAnalytics.mostBooked.slice(0, 6).map((service) => (
                     <div key={service._id} className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium text-gray-900">{service.name}</span>
@@ -705,7 +705,7 @@ export const AnalyticsPage: React.FC = () => {
                         fill="#8884d8"
                         dataKey="count"
                       >
-                        {disputeAnalytics.byStatus.map((entry, index) => (
+                        {disputeAnalytics.byStatus.map((_entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>

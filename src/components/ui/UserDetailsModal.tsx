@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Mail, Phone, MapPin, Calendar, Clock, Star, CheckCircle, XCircle, Briefcase, Package, Wallet, Shield, User as UserIcon, FileText, Image as ImageIcon, Clock3 } from 'lucide-react';
+import { X, Mail, Phone, MapPin, Calendar, Clock, Star, CheckCircle, XCircle, Briefcase, Package, Wallet, Shield, User as UserIcon, FileText, Clock3 } from 'lucide-react';
 import { User } from '@/types';
 import { userService } from '@/services/user.service';
 import { Loading } from '@/components/ui/Loading';
@@ -162,9 +162,9 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                       <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span className="break-all">{userDetails.email}</span>
                       {userDetails.isEmailVerified ? (
-                        <CheckCircle className="w-4 h-4 ml-2 text-green-500 flex-shrink-0" title="Email Verified" />
+                        <CheckCircle className="w-4 h-4 ml-2 text-green-500 flex-shrink-0" />
                       ) : (
-                        <XCircle className="w-4 h-4 ml-2 text-gray-400 flex-shrink-0" title="Email Not Verified" />
+                        <XCircle className="w-4 h-4 ml-2 text-gray-400 flex-shrink-0" />
                       )}
                     </div>
                     {userDetails.phone && (
@@ -172,9 +172,9 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                         <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
                         {userDetails.phone}
                         {userDetails.isPhoneVerified ? (
-                          <CheckCircle className="w-4 h-4 ml-2 text-green-500 flex-shrink-0" title="Phone Verified" />
+                          <CheckCircle className="w-4 h-4 ml-2 text-green-500 flex-shrink-0" />
                         ) : (
-                          <XCircle className="w-4 h-4 ml-2 text-gray-400 flex-shrink-0" title="Phone Not Verified" />
+                          <XCircle className="w-4 h-4 ml-2 text-gray-400 flex-shrink-0" />
                         )}
                       </div>
                     )}

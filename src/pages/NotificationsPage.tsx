@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Bell,
   Send,
-  Users,
   CheckCircle,
   Mail,
   MessageSquare,
@@ -574,16 +573,16 @@ export const NotificationsPage: React.FC = () => {
                     <div className="col-span-2">
                       <div className="flex gap-1">
                         {notification.channels.inApp && (
-                          <Bell className="w-4 h-4 text-gray-600" title="In-App" />
+                          <Bell className="w-4 h-4 text-gray-600" />
                         )}
                         {notification.channels.push && (
-                          <Smartphone className="w-4 h-4 text-gray-600" title="Push" />
+                          <Smartphone className="w-4 h-4 text-gray-600" />
                         )}
                         {notification.channels.email && (
-                          <Mail className="w-4 h-4 text-gray-600" title="Email" />
+                          <Mail className="w-4 h-4 text-gray-600" />
                         )}
                         {notification.channels.sms && (
-                          <MessageSquare className="w-4 h-4 text-gray-600" title="SMS" />
+                          <MessageSquare className="w-4 h-4 text-gray-600" />
                         )}
                       </div>
                     </div>

@@ -11,7 +11,6 @@ import {
   ChevronDown,
   X,
   Loader,
-  DollarSign,
 } from 'lucide-react';
 import { withdrawalService } from '../services/withdrawal.service';
 import {

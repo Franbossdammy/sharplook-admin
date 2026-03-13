@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Check, X, Eye, Trash2, RefreshCw, Filter } from 'lucide-react';
+import { Search, Check, Eye, Trash2, RefreshCw, Filter } from 'lucide-react';
 import { userService, GetUsersParams } from '@/services/user.service';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -168,16 +168,16 @@ export const UsersPage: React.FC = () => {
             variant="secondary"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            icon={<Filter className="w-4 h-4" />}
           >
+            <Filter className="w-4 h-4 mr-1 inline" />
             {showFilters ? 'Hide Filters' : 'Show Filters'}
           </Button>
           <Button
             variant="secondary"
             size="sm"
             onClick={fetchUsers}
-            icon={<RefreshCw className="w-4 h-4" />}
           >
+            <RefreshCw className="w-4 h-4 mr-1 inline" />
             Refresh
           </Button>
         </div>

@@ -265,7 +265,7 @@ export const useFeaturedProducts = () => {
         const response = await productService.getFeaturedProducts(20);
         
         // ✅ Extract products from response - featured endpoint returns { products, count }
-        const productsData = response.data.products || [];
+        const productsData = Array.isArray(response.data) ? response.data : (response.data as any).products || [];
         
         setFeaturedProducts(productsData);
       } catch (err: any) {
@@ -295,7 +295,7 @@ export const useSponsoredProducts = () => {
         const response = await productService.getSponsoredProducts(20);
         
         // ✅ Extract products from response - sponsored endpoint returns { products, count }
-        const productsData = response.data.products || [];
+        const productsData = Array.isArray(response.data) ? response.data : (response.data as any).products || [];
         
         setSponsoredProducts(productsData);
       } catch (err: any) {

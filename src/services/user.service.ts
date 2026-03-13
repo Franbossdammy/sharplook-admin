@@ -122,7 +122,7 @@ export class UserService {
     return apiService.post<{ user: User }>(`${API_ENDPOINTS.USER_BY_ID(id)}/verify-vendor`);
   }
 
-  async getUserStats(id: string): Promise<{ stats: UserStats }> {
+  async getUserStats(_id: string): Promise<{ stats: UserStats }> {
     return apiService.get<{ stats: UserStats }>(`${API_ENDPOINTS.USERS}/stats`);
   }
 }

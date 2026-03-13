@@ -9,8 +9,6 @@ import {
   AlertTriangle,
   MessageSquare,
   FileText,
-  Calendar,
-  DollarSign,
   Image as ImageIcon,
 } from 'lucide-react';
 import { disputeService } from '../../services/dispute.service';
@@ -210,7 +208,7 @@ export const DisputeDetailsModal: React.FC<DisputeDetailsModalProps> = ({
 
   const formatCurrency = (amount: number) => `₦${amount.toLocaleString()}`;
 
-  const isBookingDispute = (d: BookingDispute | ProductDispute): d is BookingDispute => {
+  const isBookingDispute = (_d: BookingDispute | ProductDispute): _d is BookingDispute => {
     return disputeType === 'booking';
   };
 

@@ -1,18 +1,13 @@
 import { useState, useEffect } from 'react';
 import { userService } from '@/services/user.service';
 import { analyticsService } from '@/services/analytics.service';
-import { disputeService } from '@/services/dispute.service';
 import { referralService } from '@/services/referral.service';
 import {
-  User,
-  Category,
   DashboardStats,
   UserAnalytics,
   BookingAnalytics,
   RevenueAnalytics,
   ServiceAnalytics,
-  Dispute,
-  Referral,
   ReferralStats,
 } from '@/types';
 
@@ -48,7 +43,7 @@ export function useDataFetch<T>(
 // Users hook
 export function useUsers(page = 1, limit = 20) {
   return useDataFetch(
-    () => userService.getUsers(page, limit),
+    () => userService.getUsers({ page, limit }),
     [page, limit]
   );
 }
@@ -58,7 +53,7 @@ export function useUsers(page = 1, limit = 20) {
 // Dashboard stats hook
 export function useDashboardStats() {
   return useDataFetch<DashboardStats>(
-    () => analyticsService.getDashboardStats(),
+    () => analyticsService.getDashboardOverview() as any,
     []
   );
 }
@@ -66,37 +61,29 @@ export function useDashboardStats() {
 // Analytics hooks
 export function useUserAnalytics(startDate?: string, endDate?: string) {
   return useDataFetch<UserAnalytics>(
-    () => analyticsService.getUserAnalytics(startDate, endDate),
+    () => analyticsService.getUserAnalytics(startDate, endDate) as any,
     [startDate, endDate]
   );
 }
 
 export function useBookingAnalytics(startDate?: string, endDate?: string) {
   return useDataFetch<BookingAnalytics>(
-    () => analyticsService.getBookingAnalytics(startDate, endDate),
+    () => analyticsService.getBookingAnalytics(startDate, endDate) as any,
     [startDate, endDate]
   );
 }
 
 export function useRevenueAnalytics(startDate?: string, endDate?: string) {
   return useDataFetch<RevenueAnalytics>(
-    () => analyticsService.getRevenueAnalytics(startDate, endDate),
+    () => analyticsService.getRevenueAnalytics(startDate, endDate) as any,
     [startDate, endDate]
   );
 }
 
 export function useServiceAnalytics() {
   return useDataFetch<ServiceAnalytics>(
-    () => analyticsService.getServiceAnalytics(),
+    () => analyticsService.getServiceAnalytics() as any,
     []
-  );
-}
-
-// Disputes hook
-export function useDisputes(page = 1, limit = 20, status?: string) {
-  return useDataFetch(
-    () => disputeService.getDisputes(page, limit, status),
-    [page, limit, status]
   );
 }
 

@@ -3,8 +3,6 @@ import {
   Withdrawal,
   WithdrawalFilters,
   WithdrawalStats,
-  ProcessWithdrawalRequest,
-  RejectWithdrawalRequest,
   RequestWithdrawalData,
 } from '../types/withdrawal.types';
 

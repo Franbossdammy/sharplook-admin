@@ -43,6 +43,7 @@ class AuditLogService {
     if (filters?.action) params.set('action', filters.action);
     if (filters?.resource) params.set('resource', filters.resource);
     if (filters?.actor) params.set('actor', filters.actor);
+    if ((filters as any)?.role) params.set('role', (filters as any).role);
     if (filters?.startDate) params.set('startDate', filters.startDate);
     if (filters?.endDate) params.set('endDate', filters.endDate);
     if (filters?.search) params.set('search', filters.search);

@@ -5,7 +5,6 @@ import {
   User,
   Building,
   Calendar,
-  DollarSign,
   AlertCircle,
   CheckCircle,
   XCircle,

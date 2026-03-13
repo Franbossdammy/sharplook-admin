@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { authService } from '@/services/auth.service';
 import { User, LoginCredentials } from '@/types';
 import { STORAGE_KEYS } from '@/utils/constants';
-import Cookies from "js-cookie"
+// import Cookies from "js-cookie"
 
 
 interface AuthContextType {
@@ -36,13 +36,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   try {
     const response = await authService.login(credentials);
 
-    const token = response.data.authToken;
-    const refreshToken = response.data.refreshToken;
-
-
+    // Tokens are saved by the auth service interceptor
     console.log("tHIS IS ", STORAGE_KEYS);
-    
-      // MUST save tokens — intercep
 
     // Correct user assignment
     setUser(response.data.user);
