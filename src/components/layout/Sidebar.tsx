@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   TrendingUp,
   ClipboardList,
+  Shield,
   LucideIcon,
 } from 'lucide-react';
 import { ROUTES } from '@/utils/constants';
@@ -50,6 +51,7 @@ const navItems: NavItem[] = [
   { id: 'subscriptions', label: 'Subscriptions', icon: Crown, path: ROUTES.SUBSCRIPTIONS, allowedRoles: ['super_admin', 'admin', 'financial_admin'] },
   { id: 'redflags', label: 'Red Flags', icon: AlertTriangle, path: ROUTES.REDFLAGS, allowedRoles: ['super_admin', 'admin', 'support'] },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp, path: ROUTES.ANALYTICS, allowedRoles: ['super_admin', 'admin', 'financial_admin', 'analytics_admin'] },
+  { id: 'admin-management', label: 'Admin Management', icon: Shield, path: ROUTES.ADMIN_MANAGEMENT, allowedRoles: ['super_admin', 'admin'] },
   { id: 'audit-logs', label: 'Audit Logs', icon: ClipboardList, path: ROUTES.AUDIT_LOGS, allowedRoles: ['super_admin', 'admin'] },
 ];
 

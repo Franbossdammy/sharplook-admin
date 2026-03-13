@@ -122,6 +122,23 @@ export class UserService {
     return apiService.post<{ user: User }>(`${API_ENDPOINTS.USER_BY_ID(id)}/verify-vendor`);
   }
 
+  async createAdmin(data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    password: string;
+    role: string;
+  }): Promise<any> {
+    const response: any = await apiService.post(API_ENDPOINTS.CREATE_ADMIN, data);
+    return response.data || response;
+  }
+
+  async updateAdminRole(userId: string, role: string): Promise<any> {
+    const response: any = await apiService.put(`${API_ENDPOINTS.USERS}/admin/${userId}/role`, { role });
+    return response.data || response;
+  }
+
   async getUserStats(_id: string): Promise<{ stats: UserStats }> {
     return apiService.get<{ stats: UserStats }>(`${API_ENDPOINTS.USERS}/stats`);
   }

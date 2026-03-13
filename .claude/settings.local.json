@@ -7,7 +7,11 @@
       "Bash(find /c/Users/YungFlash/Downloads/sharplook-backend-complete/sharplook-backend/src -type f -name \"*.ts\" | xargs grep -l \"audit\\\\|Audit\" | head -10)",
       "Bash(find /c/Users/YungFlash/Downloads/sharplook-backend-complete/sharplook-backend/src -type f -name \"*.ts\" | xargs grep -l \"audit\\\\|Audit\\\\|AuditLog\" | head -10)",
       "Bash(find \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-backend-complete\\\\sharplook-backend\" -name \"*ategory*\" -type f 2>/dev/null | head -20)",
-      "Bash(cd \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-admin-complete\\\\sharplook-admin\" && npm run build 2>&1)"
+      "Bash(cd \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-admin-complete\\\\sharplook-admin\" && npm run build 2>&1)",
+      "Bash(find \"C:\\\\Users\\\\YungFlash\\\\Downloads\" -name \"*admin*\" -o -name \"*app*\" 2>/dev/null | grep -E \"sharplook.*admin|sharplook.*app\" | head -10)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\\\\app\\\\verify-email\" && mkdir -p \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\\\\app\\\\reset-password\")",
+      "Bash(cd \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\" && npm run build 2>&1)",
+      "Bash(ls \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\"/.env* 2>/dev/null || echo \"no env files\")"
     ]
   }
 }

@@ -23,6 +23,7 @@ import { ReviewsPage } from './pages/ReviewsPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { ReferralsPage } from './pages/ReferralsPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
+import { AdminManagementPage } from './pages/AdminManagementPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -268,6 +269,18 @@ const AppRoutes: React.FC = () => {
             <MainLayout>
               <RoleBasedRoute allowedRoles={['admin', 'support']}>
                 <RedFlagsPage />
+              </RoleBasedRoute>
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.ADMIN_MANAGEMENT}
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <RoleBasedRoute allowedRoles={['admin']}>
+                <AdminManagementPage />
               </RoleBasedRoute>
             </MainLayout>
           </ProtectedRoute>

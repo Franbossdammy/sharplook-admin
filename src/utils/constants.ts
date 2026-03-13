@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: string) => `/users/${id}`,
   VENDOR_DETAILS : (id:string)=> `users/vendors/${id}`,
   VERIFY_VENDOR: (id: string) => `/users/${id}/verify-vendor`,
+  CREATE_ADMIN: '/users/admin',
   
   // Categories
   CATEGORIES: '/categories',
@@ -131,6 +132,7 @@ export const ROUTES = {
   BOOKINGS: '/bookings',
   REVIEWS: '/reviews',
   SUBSCRIPTIONS: '/subscriptions',
+  ADMIN_MANAGEMENT: '/admin-management',
   AUDIT_LOGS: '/audit-logs',
 } as const;
 
