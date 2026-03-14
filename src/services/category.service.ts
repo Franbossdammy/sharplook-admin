@@ -9,7 +9,7 @@ import {
 
 export class CategoryService {
   async getAllCategories(): Promise<CategoriesResponse> {
-    return await apiService.get<CategoriesResponse>(API_ENDPOINTS.CATEGORIES);
+    return await apiService.get<CategoriesResponse>(`${API_ENDPOINTS.CATEGORIES}?limit=100`);
   }
 
   async getCategoryById(categoryId: string): Promise<CategoryResponse> {
