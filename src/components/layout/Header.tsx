@@ -22,7 +22,7 @@ export const Header: React.FC = () => {
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">SharpLook Admin</h1>
+            <h1 className="text-xl font-bold text-gray-900">LookReal Admin</h1>
             <p className="text-sm text-gray-500">Complete Management Dashboard</p>
           </div>
         </div>
