@@ -41,7 +41,7 @@ export const LoginPage: React.FC = () => {
           <div className="w-20 h-20 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">SharpLook Admin</h1>
+          <h1 className="text-3xl font-bold text-gray-900">LookReal Admin</h1>
           <p className="text-gray-500 mt-2">Sign in to access the dashboard</p>
         </div>
 
@@ -55,7 +55,7 @@ export const LoginPage: React.FC = () => {
           <Input
             type="email"
             label="Email"
-            placeholder="admin@sharplook.com"
+            placeholder="admin@lookreal.beauty"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
