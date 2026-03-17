@@ -24,6 +24,7 @@ import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { ReferralsPage } from './pages/ReferralsPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { AdminManagementPage } from './pages/AdminManagementPage';
+import { BlogPage } from './pages/BlogPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -293,6 +294,18 @@ const AppRoutes: React.FC = () => {
             <MainLayout>
               <RoleBasedRoute allowedRoles={['admin']}>
                 <AuditLogsPage />
+              </RoleBasedRoute>
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.BLOG}
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <RoleBasedRoute allowedRoles={['admin', 'support']}>
+                <BlogPage />
               </RoleBasedRoute>
             </MainLayout>
           </ProtectedRoute>

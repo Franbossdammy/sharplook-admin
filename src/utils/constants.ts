@@ -104,6 +104,17 @@ export const API_ENDPOINTS = {
 
   // Audit Logs
   AUDIT_LOGS: '/audit-logs',
+
+  // Blog
+  BLOG_ADMIN: '/blog/admin',
+  BLOG_ADMIN_PENDING: '/blog/admin/pending',
+  BLOG_ADMIN_STATS: '/blog/admin/stats',
+  BLOG_ADMIN_BY_ID: (id: string) => `/blog/admin/${id}`,
+  BLOG_APPROVE: (id: string) => `/blog/admin/${id}/approve`,
+  BLOG_REJECT: (id: string) => `/blog/admin/${id}/reject`,
+  BLOG_HIDE: (id: string) => `/blog/admin/${id}/hide`,
+  BLOG_FEATURE: (id: string) => `/blog/admin/${id}/feature`,
+  BLOG_TOGGLE_COMMENT: (postId: string, commentId: string) => `/blog/admin/${postId}/comment/${commentId}/toggle`,
 } as const;
 
 // Storage Keys
@@ -136,6 +147,7 @@ export const ROUTES = {
   SUBSCRIPTIONS: '/subscriptions',
   ADMIN_MANAGEMENT: '/admin-management',
   AUDIT_LOGS: '/audit-logs',
+  BLOG: '/blog',
 } as const;
 
 // Pagination
