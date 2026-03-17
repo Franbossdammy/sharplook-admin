@@ -87,7 +87,7 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <MainLayout>
-              <RoleBasedRoute allowedRoles={['admin', 'support']}>
+              <RoleBasedRoute allowedRoles={['admin', 'support', 'analytics_admin']}>
                 <UsersPage />
               </RoleBasedRoute>
             </MainLayout>

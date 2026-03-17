@@ -101,6 +101,55 @@ export class AnalyticsService {
   }
 
   /**
+   * Get detailed user list for analytics
+   */
+  async getUserDetails(params: {
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+    role?: string;
+    status?: string;
+    search?: string;
+  } = {}): Promise<any> {
+    const queryParams = new URLSearchParams();
+    if (params.startDate) queryParams.append('startDate', params.startDate);
+    if (params.endDate) queryParams.append('endDate', params.endDate);
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.role) queryParams.append('role', params.role);
+    if (params.status) queryParams.append('status', params.status);
+    if (params.search) queryParams.append('search', params.search);
+
+    const response = await apiService.get<any>(
+      `${API_ENDPOINTS.USER_DETAILS_ANALYTICS}${queryParams.toString() ? '?' + queryParams.toString() : ''}`
+    );
+    return response.data?.data || response.data || response;
+  }
+
+  /**
+   * Export user data as CSV
+   */
+  async exportUserDataCSV(params: {
+    startDate?: string;
+    endDate?: string;
+    role?: string;
+    status?: string;
+  } = {}): Promise<Blob> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('format', 'csv');
+    if (params.startDate) queryParams.append('startDate', params.startDate);
+    if (params.endDate) queryParams.append('endDate', params.endDate);
+    if (params.role) queryParams.append('role', params.role);
+    if (params.status) queryParams.append('status', params.status);
+
+    return apiService.get<Blob>(
+      `${API_ENDPOINTS.EXPORT_USER_DATA}?${queryParams.toString()}`,
+      { responseType: 'blob' }
+    );
+  }
+
+  /**
    * Export analytics data
    */
   async exportAnalytics(type: string, startDate?: string, endDate?: string): Promise<Blob> {

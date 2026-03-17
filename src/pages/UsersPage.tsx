@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Check, Eye, Trash2, RefreshCw, Filter } from 'lucide-react';
+import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download } from 'lucide-react';
 import { userService, GetUsersParams } from '@/services/user.service';
+import { analyticsService } from '@/services/analytics.service';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -9,6 +10,7 @@ import { UserDetailsModal } from '@/components/ui/UserDetailsModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast } from '@/components/ui/Toast';
 import { User } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ToastState {
   show: boolean;
@@ -17,10 +19,13 @@ interface ToastState {
 }
 
 export const UsersPage: React.FC = () => {
+  const { user: currentAdmin } = useAuth();
+  const isAnalyticsAdmin = currentAdmin?.role === 'analytics_admin';
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [exportingCSV, setExportingCSV] = useState(false);
   
   // Modal states
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; user: User | null }>({
@@ -133,6 +138,28 @@ export const UsersPage: React.FC = () => {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      setExportingCSV(true);
+      const blob = await analyticsService.exportUserDataCSV({
+        role: filters.role,
+        status: filters.status,
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error: any) {
+      showToast('Failed to export: ' + (error.message || 'Unknown error'), 'error');
+    } finally {
+      setExportingCSV(false);
+    }
+  };
+
   const resetFilters = () => {
     setFilters({
       page: 1,
@@ -164,6 +191,15 @@ export const UsersPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportCSV}
+            disabled={exportingCSV}
+          >
+            <Download className="w-4 h-4 mr-1 inline" />
+            {exportingCSV ? 'Exporting...' : 'Export CSV'}
+          </Button>
           <Button
             variant="secondary"
             size="sm"
@@ -380,10 +416,8 @@ export const UsersPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <select
-                          value={user.status}
-                          onChange={(e) => handleUpdateStatus(user._id, e.target.value)}
-                          className={`text-xs font-medium rounded-lg px-2 py-1 border-0 focus:ring-2 focus:ring-primary-500 capitalize ${
+                        {isAnalyticsAdmin ? (
+                          <span className={`text-xs font-medium rounded-lg px-2 py-1 capitalize ${
                             user.status === 'active'
                               ? 'bg-green-100 text-green-800'
                               : user.status === 'suspended'
@@ -391,13 +425,29 @@ export const UsersPage: React.FC = () => {
                               : user.status === 'pending_verification'
                               ? 'bg-blue-100 text-blue-800'
                               : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                          <option value="suspended">Suspended</option>
-                          <option value="pending_verification">Pending</option>
-                        </select>
+                          }`}>
+                            {user.status}
+                          </span>
+                        ) : (
+                          <select
+                            value={user.status}
+                            onChange={(e) => handleUpdateStatus(user._id, e.target.value)}
+                            className={`text-xs font-medium rounded-lg px-2 py-1 border-0 focus:ring-2 focus:ring-primary-500 capitalize ${
+                              user.status === 'active'
+                                ? 'bg-green-100 text-green-800'
+                                : user.status === 'suspended'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : user.status === 'pending_verification'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="pending_verification">Pending</option>
+                          </select>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
                         {new Date(user.createdAt).toLocaleDateString()}
@@ -411,7 +461,7 @@ export const UsersPage: React.FC = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          {user.isVendor && !user.vendorProfile?.isVerified && (
+                          {!isAnalyticsAdmin && user.isVendor && !user.vendorProfile?.isVerified && (
                             <button
                               onClick={() => setVerifyModal({ show: true, user })}
                               className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -420,13 +470,15 @@ export const UsersPage: React.FC = () => {
                               <Check className="w-4 h-4" />
                             </button>
                           )}
-                          <button
-                            onClick={() => setDeleteModal({ show: true, user })}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete User"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {!isAnalyticsAdmin && (
+                            <button
+                              onClick={() => setDeleteModal({ show: true, user })}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete User"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

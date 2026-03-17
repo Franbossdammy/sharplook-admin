@@ -11,6 +11,10 @@ import {
   Gift,
   Filter,
   X,
+  Search,
+  Eye,
+  FileSpreadsheet,
+  UserCheck,
 } from 'lucide-react';
 import { analyticsService } from '../services/analytics.service';
 import {
@@ -40,6 +44,7 @@ import {
 
 type TabType =
   | 'users'
+  | 'userDetails'
   | 'bookings'
   | 'revenue'
   | 'services'
@@ -67,9 +72,24 @@ export const AnalyticsPage: React.FC = () => {
   const [disputeAnalytics, setDisputeAnalytics] = useState<DisputeAnalytics | null>(null);
   const [referralAnalytics, setReferralAnalytics] = useState<ReferralAnalytics | null>(null);
 
+  // User details states
+  const [userDetails, setUserDetails] = useState<any>(null);
+  const [userDetailsSearch, setUserDetailsSearch] = useState('');
+  const [userDetailsRole, setUserDetailsRole] = useState('');
+  const [userDetailsStatus, setUserDetailsStatus] = useState('');
+  const [userDetailsPage, setUserDetailsPage] = useState(1);
+  const [selectedUserDetail, setSelectedUserDetail] = useState<any>(null);
+  const [exportingCSV, setExportingCSV] = useState(false);
+
   useEffect(() => {
     fetchAnalytics();
   }, [activeTab, dateRange]);
+
+  useEffect(() => {
+    if (activeTab === 'userDetails') {
+      fetchUserDetails();
+    }
+  }, [userDetailsSearch, userDetailsRole, userDetailsStatus, userDetailsPage, dateRange]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -80,6 +100,9 @@ export const AnalyticsPage: React.FC = () => {
         case 'users':
           const userData = await analyticsService.getUserAnalytics(startDate, endDate);
           setUserAnalytics(userData);
+          break;
+        case 'userDetails':
+          await fetchUserDetails();
           break;
         case 'bookings':
           const bookingData = await analyticsService.getBookingAnalytics(startDate, endDate);
@@ -113,6 +136,50 @@ export const AnalyticsPage: React.FC = () => {
     }
   };
 
+  const fetchUserDetails = async () => {
+    setLoading(true);
+    try {
+      const data = await analyticsService.getUserDetails({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        page: userDetailsPage,
+        limit: 50,
+        role: userDetailsRole,
+        status: userDetailsStatus,
+        search: userDetailsSearch,
+      });
+      setUserDetails(data);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      setExportingCSV(true);
+      const blob = await analyticsService.exportUserDataCSV({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        role: userDetailsRole,
+        status: userDetailsStatus,
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+    } finally {
+      setExportingCSV(false);
+    }
+  };
+
   const handleExport = async () => {
     try {
       const blob = await analyticsService.exportAnalytics(
@@ -140,6 +207,7 @@ export const AnalyticsPage: React.FC = () => {
 
   const tabs = [
     { id: 'users' as TabType, label: 'Users', icon: Users },
+    { id: 'userDetails' as TabType, label: 'User Details', icon: UserCheck },
     { id: 'bookings' as TabType, label: 'Bookings', icon: Calendar },
     { id: 'revenue' as TabType, label: 'Revenue', icon: DollarSign },
     { id: 'services' as TabType, label: 'Services', icon: Package },
@@ -349,6 +417,246 @@ export const AnalyticsPage: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
+            </>
+          )}
+
+          {/* User Details Tab */}
+          {activeTab === 'userDetails' && (
+            <>
+              {/* Header with Export */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Registered Users {userDetails?.total ? `(${userDetails.total})` : ''}
+                </h3>
+                <button
+                  onClick={handleExportCSV}
+                  disabled={exportingCSV}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  {exportingCSV ? 'Exporting...' : 'Export CSV'}
+                </button>
+              </div>
+
+              {/* Search & Filters */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="relative md:col-span-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by name, email, or phone..."
+                      value={userDetailsSearch}
+                      onChange={(e) => { setUserDetailsSearch(e.target.value); setUserDetailsPage(1); }}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                  <select
+                    value={userDetailsRole}
+                    onChange={(e) => { setUserDetailsRole(e.target.value); setUserDetailsPage(1); }}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="">All Roles</option>
+                    <option value="client">Client</option>
+                    <option value="vendor">Vendor</option>
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
+                  <select
+                    value={userDetailsStatus}
+                    onChange={(e) => { setUserDetailsStatus(e.target.value); setUserDetailsPage(1); }}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="pending_verification">Pending</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Users Table */}
+              {userDetails?.users && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Login</th>
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {userDetails.users.map((user: any) => (
+                          <tr key={user._id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-medium text-primary-600">
+                                  {user.firstName?.[0]?.toUpperCase()}{user.lastName?.[0]?.toUpperCase()}
+                                </div>
+                                <span className="text-sm font-medium text-gray-900">
+                                  {user.firstName} {user.lastName}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900 break-all">{user.email}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{user.phone}</td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                                user.role === 'vendor' ? 'bg-blue-100 text-blue-800' :
+                                user.role === 'admin' || user.role === 'super_admin' ? 'bg-purple-100 text-purple-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {user.role}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                                user.status === 'active' ? 'bg-green-100 text-green-800' :
+                                user.status === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
+                                user.status === 'pending_verification' ? 'bg-blue-100 text-blue-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {user.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {user.location?.city ? `${user.location.city}${user.location.state ? ', ' + user.location.state : ''}` : '-'}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => setSelectedUserDetail(selectedUserDetail?._id === user._id ? null : user)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination */}
+                  {userDetails.totalPages > 1 && (
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+                      <p className="text-sm text-gray-600">
+                        Page {userDetails.page} of {userDetails.totalPages} ({userDetails.total} users)
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setUserDetailsPage(Math.max(1, userDetailsPage - 1))}
+                          disabled={userDetailsPage === 1}
+                          className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setUserDetailsPage(Math.min(userDetails.totalPages, userDetailsPage + 1))}
+                          disabled={userDetailsPage === userDetails.totalPages}
+                          className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* User Detail Modal */}
+              {selectedUserDetail && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      User Details: {selectedUserDetail.firstName} {selectedUserDetail.lastName}
+                    </h3>
+                    <button onClick={() => setSelectedUserDetail(null)} className="text-gray-400 hover:text-gray-600">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Email</p>
+                      <p className="text-sm font-medium text-gray-900 break-all">{selectedUserDetail.email}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Phone</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedUserDetail.phone}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Role</p>
+                      <p className="text-sm font-medium text-gray-900 capitalize">{selectedUserDetail.role}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Status</p>
+                      <p className="text-sm font-medium text-gray-900 capitalize">{selectedUserDetail.status}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Email Verified</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedUserDetail.isEmailVerified ? 'Yes' : 'No'}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Phone Verified</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedUserDetail.isPhoneVerified ? 'Yes' : 'No'}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Is Vendor</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedUserDetail.isVendor ? 'Yes' : 'No'}</p>
+                    </div>
+                    {selectedUserDetail.vendorProfile?.businessName && (
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-gray-500 mb-1">Business Name</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedUserDetail.vendorProfile.businessName}</p>
+                      </div>
+                    )}
+                    {selectedUserDetail.vendorProfile?.isVerified !== undefined && (
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-gray-500 mb-1">Vendor Verified</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedUserDetail.vendorProfile.isVerified ? 'Yes' : 'No'}</p>
+                      </div>
+                    )}
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Location</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {selectedUserDetail.location?.city
+                          ? `${selectedUserDetail.location.city}${selectedUserDetail.location.state ? ', ' + selectedUserDetail.location.state : ''}`
+                          : 'Not set'}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Joined</p>
+                      <p className="text-sm font-medium text-gray-900">{new Date(selectedUserDetail.createdAt).toLocaleString()}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Last Login</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {selectedUserDetail.lastLogin ? new Date(selectedUserDetail.lastLogin).toLocaleString() : 'Never'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {userDetails?.users?.length === 0 && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                  <p className="text-gray-500">No users found matching your filters</p>
+                </div>
+              )}
             </>
           )}
 

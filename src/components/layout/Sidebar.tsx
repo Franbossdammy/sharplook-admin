@@ -35,7 +35,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: ROUTES.DASHBOARD },
-  { id: 'users', label: 'Users', icon: Users, path: ROUTES.USERS, allowedRoles: ['super_admin', 'admin', 'support'] },
+  { id: 'users', label: 'Users', icon: Users, path: ROUTES.USERS, allowedRoles: ['super_admin', 'admin', 'support', 'analytics_admin'] },
   { id: 'categories', label: 'Categories', icon: FolderTree, path: ROUTES.CATEGORIES, allowedRoles: ['super_admin', 'admin'] },
   { id: 'services', label: 'Services', icon: Briefcase, path: ROUTES.SERVICES, allowedRoles: ['super_admin', 'admin'] },
   { id: 'products', label: 'Products', icon: Package, path: ROUTES.PRODUCTS, allowedRoles: ['super_admin', 'admin'] },
