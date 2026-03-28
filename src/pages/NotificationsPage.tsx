@@ -559,9 +559,9 @@ export const NotificationsPage: React.FC = () => {
 
                     <div className="col-span-2">
                       <p className="text-sm font-medium text-gray-900">
-                        {notification.user.firstName} {notification.user.lastName}
+                        {notification.user?.firstName ?? 'Deleted'} {notification.user?.lastName ?? 'User'}
                       </p>
-                      <p className="text-xs text-gray-600">{notification.user.email}</p>
+                      <p className="text-xs text-gray-600">{notification.user?.email ?? 'N/A'}</p>
                     </div>
 
                     <div className="col-span-2">
