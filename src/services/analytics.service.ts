@@ -9,6 +9,7 @@ import type {
   VendorPerformance,
   DisputeAnalytics,
   ReferralAnalytics,
+  AcquisitionAnalytics,
 } from '../types/analytics.types';
 
 export class AnalyticsService {
@@ -97,6 +98,20 @@ export class AnalyticsService {
    */
   async getReferralAnalytics(): Promise<ReferralAnalytics> {
     const response = await apiService.get<any>(API_ENDPOINTS.REFERRAL_ANALYTICS);
+    return response.data?.data || response.data || response;
+  }
+
+  /**
+   * Get "How did you hear about us" acquisition analytics
+   */
+  async getAcquisitionAnalytics(startDate?: string, endDate?: string): Promise<AcquisitionAnalytics> {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+
+    const response = await apiService.get<any>(
+      `${API_ENDPOINTS.ACQUISITION_ANALYTICS}${params.toString() ? '?' + params.toString() : ''}`
+    );
     return response.data?.data || response.data || response;
   }
 

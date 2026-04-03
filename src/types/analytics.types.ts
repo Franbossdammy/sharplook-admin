@@ -147,6 +147,23 @@ export interface ReferralAnalytics {
   conversionRate: string;
 }
 
+// Acquisition Analytics Types
+export interface AcquisitionAnalytics {
+  bySource: Array<{
+    _id: string;
+    count: number;
+  }>;
+  bySourceAndMonth: Array<{
+    _id: {
+      source: string;
+      year: number;
+      month: number;
+    };
+    count: number;
+  }>;
+  totalResponses: number;
+}
+
 // Chart Data Types
 export interface ChartData {
   name: string;

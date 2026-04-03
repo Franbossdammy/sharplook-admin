@@ -15,6 +15,7 @@ import {
   Eye,
   FileSpreadsheet,
   UserCheck,
+  Megaphone,
 } from 'lucide-react';
 import { analyticsService } from '../services/analytics.service';
 import {
@@ -25,6 +26,7 @@ import {
   VendorPerformance,
   DisputeAnalytics,
   ReferralAnalytics,
+  AcquisitionAnalytics,
 } from '../types/analytics.types';
 import {
   LineChart,
@@ -50,7 +52,8 @@ type TabType =
   | 'services'
   | 'vendors'
   | 'disputes'
-  | 'referrals';
+  | 'referrals'
+  | 'acquisition';
 
 const COLORS = ['#eb278d', '#f472b6', '#ec4899', '#db2777', '#be185d', '#9f1239'];
 
@@ -71,6 +74,7 @@ export const AnalyticsPage: React.FC = () => {
   const [vendorPerformance, setVendorPerformance] = useState<VendorPerformance | null>(null);
   const [disputeAnalytics, setDisputeAnalytics] = useState<DisputeAnalytics | null>(null);
   const [referralAnalytics, setReferralAnalytics] = useState<ReferralAnalytics | null>(null);
+  const [acquisitionAnalytics, setAcquisitionAnalytics] = useState<AcquisitionAnalytics | null>(null);
 
   // User details states
   const [userDetails, setUserDetails] = useState<any>(null);
@@ -127,6 +131,10 @@ export const AnalyticsPage: React.FC = () => {
         case 'referrals':
           const referralData = await analyticsService.getReferralAnalytics();
           setReferralAnalytics(referralData);
+          break;
+        case 'acquisition':
+          const acquisitionData = await analyticsService.getAcquisitionAnalytics(startDate, endDate);
+          setAcquisitionAnalytics(acquisitionData);
           break;
       }
     } catch (error) {
@@ -214,6 +222,7 @@ export const AnalyticsPage: React.FC = () => {
     { id: 'vendors' as TabType, label: 'Vendors', icon: Award },
     { id: 'disputes' as TabType, label: 'Disputes', icon: MessageSquare },
     { id: 'referrals' as TabType, label: 'Referrals', icon: Gift },
+    { id: 'acquisition' as TabType, label: 'Acquisition', icon: Megaphone },
   ];
 
   const formatCurrency = (amount: number) => `₦${amount.toLocaleString()}`;
@@ -1102,6 +1111,213 @@ export const AnalyticsPage: React.FC = () => {
                       ></div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Acquisition Analytics Tab */}
+          {activeTab === 'acquisition' && acquisitionAnalytics && (
+            <>
+              {/* Total Responses Card */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <p className="text-sm text-gray-600 mb-1">Total Responses</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {acquisitionAnalytics.totalResponses}
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <p className="text-sm text-gray-600 mb-1">Top Source</p>
+                  <p className="text-2xl font-bold text-primary-600">
+                    {acquisitionAnalytics.bySource?.[0]?._id
+                      ? {
+                          instagram: 'Instagram',
+                          facebook: 'Facebook',
+                          tiktok: 'TikTok',
+                          twitter: 'Twitter / X',
+                          youtube: 'YouTube',
+                          linkedin: 'LinkedIn',
+                          whatsapp: 'WhatsApp',
+                          google_search: 'Google Search',
+                          friend_family: 'Friend / Family',
+                          referral: 'Referral',
+                          blog_article: 'Blog / Article',
+                          other: 'Other',
+                        }[acquisitionAnalytics.bySource[0]._id] || acquisitionAnalytics.bySource[0]._id
+                      : 'N/A'}
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <p className="text-sm text-gray-600 mb-1">Total Sources</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {acquisitionAnalytics.bySource?.length || 0}
+                  </p>
+                </div>
+              </div>
+
+              {/* Pie Chart - Source Distribution */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Where Users Heard About Us
+                  </h3>
+                  {acquisitionAnalytics.bySource && acquisitionAnalytics.bySource.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={350}>
+                      <PieChart>
+                        <Pie
+                          data={acquisitionAnalytics.bySource.map((s) => ({
+                            name: {
+                              instagram: 'Instagram',
+                              facebook: 'Facebook',
+                              tiktok: 'TikTok',
+                              twitter: 'Twitter / X',
+                              youtube: 'YouTube',
+                              linkedin: 'LinkedIn',
+                              whatsapp: 'WhatsApp',
+                              google_search: 'Google Search',
+                              friend_family: 'Friend / Family',
+                              referral: 'Referral',
+                              blog_article: 'Blog / Article',
+                              other: 'Other',
+                            }[s._id] || s._id,
+                            value: s.count,
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={true}
+                          label={({ name, percent }) =>
+                            `${name} (${(percent * 100).toFixed(0)}%)`
+                          }
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {acquisitionAnalytics.bySource.map((_, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={
+                                [
+                                  '#eb278d', '#f472b6', '#ec4899', '#db2777',
+                                  '#be185d', '#9f1239', '#f59e0b', '#10b981',
+                                  '#3b82f6', '#6366f1', '#8b5cf6', '#ef4444',
+                                ][index % 12]
+                              }
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-gray-500 text-center py-8">No data available</p>
+                  )}
+                </div>
+
+                {/* Bar Chart - Source Breakdown */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Acquisition Source Breakdown
+                  </h3>
+                  {acquisitionAnalytics.bySource && acquisitionAnalytics.bySource.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={350}>
+                      <BarChart
+                        data={acquisitionAnalytics.bySource.map((s) => ({
+                          name: {
+                            instagram: 'Instagram',
+                            facebook: 'Facebook',
+                            tiktok: 'TikTok',
+                            twitter: 'Twitter/X',
+                            youtube: 'YouTube',
+                            linkedin: 'LinkedIn',
+                            whatsapp: 'WhatsApp',
+                            google_search: 'Google',
+                            friend_family: 'Friend',
+                            referral: 'Referral',
+                            blog_article: 'Blog',
+                            other: 'Other',
+                          }[s._id] || s._id,
+                          count: s.count,
+                        }))}
+                        layout="vertical"
+                        margin={{ left: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis dataKey="name" type="category" width={80} />
+                        <Tooltip />
+                        <Bar dataKey="count" fill="#eb278d" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-gray-500 text-center py-8">No data available</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Detailed Table */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Detailed Source Metrics
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-semibold text-gray-600">Source</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Users</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-600">Percentage</th>
+                        <th className="text-left py-3 px-4 font-semibold text-gray-600">Distribution</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {acquisitionAnalytics.bySource?.map((source, index) => {
+                        const percentage = acquisitionAnalytics.totalResponses > 0
+                          ? ((source.count / acquisitionAnalytics.totalResponses) * 100).toFixed(1)
+                          : '0';
+                        const label = {
+                          instagram: 'Instagram',
+                          facebook: 'Facebook',
+                          tiktok: 'TikTok',
+                          twitter: 'Twitter / X',
+                          youtube: 'YouTube',
+                          linkedin: 'LinkedIn',
+                          whatsapp: 'WhatsApp',
+                          google_search: 'Google Search',
+                          friend_family: 'Friend / Family',
+                          referral: 'Referral',
+                          blog_article: 'Blog / Article',
+                          other: 'Other',
+                        }[source._id] || source._id;
+
+                        return (
+                          <tr key={source._id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-3 px-4 font-medium text-gray-900">{label}</td>
+                            <td className="py-3 px-4 text-right font-bold text-gray-900">
+                              {source.count}
+                            </td>
+                            <td className="py-3 px-4 text-right text-gray-600">{percentage}%</td>
+                            <td className="py-3 px-4">
+                              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                <div
+                                  className="h-2.5 rounded-full"
+                                  style={{
+                                    width: `${percentage}%`,
+                                    backgroundColor: [
+                                      '#eb278d', '#f472b6', '#ec4899', '#db2777',
+                                      '#be185d', '#9f1239', '#f59e0b', '#10b981',
+                                      '#3b82f6', '#6366f1', '#8b5cf6', '#ef4444',
+                                    ][index % 12],
+                                  }}
+                                ></div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </>
