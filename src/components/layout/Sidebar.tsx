@@ -51,7 +51,7 @@ const navItems: NavItem[] = [
   { id: 'referrals', label: 'Referrals', icon: Gift, path: ROUTES.REFERRALS, allowedRoles: ['super_admin', 'admin'] },
   { id: 'subscriptions', label: 'Subscriptions', icon: Crown, path: ROUTES.SUBSCRIPTIONS, allowedRoles: ['super_admin', 'admin', 'financial_admin'] },
   { id: 'redflags', label: 'Red Flags', icon: AlertTriangle, path: ROUTES.REDFLAGS, allowedRoles: ['super_admin', 'admin', 'support'] },
-  { id: 'blog', label: 'Blog', icon: FileText, path: ROUTES.BLOG, allowedRoles: ['super_admin', 'admin', 'support'] },
+  { id: 'blog', label: 'Blog', icon: FileText, path: ROUTES.BLOG, allowedRoles: ['super_admin', 'admin', 'support', 'content_admin', 'analytics_admin'] },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp, path: ROUTES.ANALYTICS, allowedRoles: ['super_admin', 'admin', 'financial_admin', 'analytics_admin'] },
   { id: 'admin-management', label: 'Admin Management', icon: Shield, path: ROUTES.ADMIN_MANAGEMENT, allowedRoles: ['super_admin', 'admin'] },
   { id: 'audit-logs', label: 'Audit Logs', icon: ClipboardList, path: ROUTES.AUDIT_LOGS, allowedRoles: ['super_admin', 'admin'] },

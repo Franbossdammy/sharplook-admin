@@ -304,7 +304,7 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <MainLayout>
-              <RoleBasedRoute allowedRoles={['admin', 'support']}>
+              <RoleBasedRoute allowedRoles={['admin', 'support', 'content_admin', 'analytics_admin']}>
                 <BlogPage />
               </RoleBasedRoute>
             </MainLayout>
