@@ -21,6 +21,7 @@ import {
   ClipboardList,
   Shield,
   FileText,
+  Settings,
   LucideIcon,
 } from 'lucide-react';
 import { ROUTES } from '@/utils/constants';
@@ -55,6 +56,7 @@ const navItems: NavItem[] = [
   { id: 'analytics', label: 'Analytics', icon: TrendingUp, path: ROUTES.ANALYTICS, allowedRoles: ['super_admin', 'admin', 'financial_admin', 'analytics_admin'] },
   { id: 'admin-management', label: 'Admin Management', icon: Shield, path: ROUTES.ADMIN_MANAGEMENT, allowedRoles: ['super_admin', 'admin'] },
   { id: 'audit-logs', label: 'Audit Logs', icon: ClipboardList, path: ROUTES.AUDIT_LOGS, allowedRoles: ['super_admin', 'admin'] },
+  { id: 'app-settings', label: 'App Settings', icon: Settings, path: ROUTES.APP_SETTINGS, allowedRoles: ['super_admin', 'admin'] },
 ];
 
 export const Sidebar: React.FC = () => {

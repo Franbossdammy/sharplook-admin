@@ -149,6 +149,7 @@ export const ROUTES = {
   ADMIN_MANAGEMENT: '/admin-management',
   AUDIT_LOGS: '/audit-logs',
   BLOG: '/blog',
+  APP_SETTINGS: '/app-settings',
 } as const;
 
 // Pagination

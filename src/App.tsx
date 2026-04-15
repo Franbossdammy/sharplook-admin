@@ -25,6 +25,7 @@ import { ReferralsPage } from './pages/ReferralsPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { AdminManagementPage } from './pages/AdminManagementPage';
 import { BlogPage } from './pages/BlogPage';
+import { AppSettingsPage } from './pages/AppSettingsPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -311,7 +312,18 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       />
-      {/* Add more routes as needed */}
+      <Route
+        path={ROUTES.APP_SETTINGS}
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <RoleBasedRoute allowedRoles={['admin']}>
+                <AppSettingsPage />
+              </RoleBasedRoute>
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
     </Routes>
   );
