@@ -11,7 +11,8 @@
       "Bash(find \"C:\\\\Users\\\\YungFlash\\\\Downloads\" -name \"*admin*\" -o -name \"*app*\" 2>/dev/null | grep -E \"sharplook.*admin|sharplook.*app\" | head -10)",
       "Bash(mkdir -p \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\\\\app\\\\verify-email\" && mkdir -p \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\\\\app\\\\reset-password\")",
       "Bash(cd \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\" && npm run build 2>&1)",
-      "Bash(ls \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\"/.env* 2>/dev/null || echo \"no env files\")"
+      "Bash(ls \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\"/.env* 2>/dev/null || echo \"no env files\")",
+      "Bash(xargs grep *)"
     ]
   }
 }
