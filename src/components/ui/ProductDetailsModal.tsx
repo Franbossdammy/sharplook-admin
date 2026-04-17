@@ -1,8 +1,9 @@
 import React from 'react';
-import { 
+import { getImageUrl } from '@/utils/image';
+import {
   X,
   MapPin,
-  Ruler, 
+  Ruler,
   Tag, 
   Truck, 
   Star, 
@@ -87,7 +88,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               {/* Main Image */}
               <div className="mb-4 aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 <img
-                  src={product.images[selectedImage] || '/placeholder-product.png'}
+                  src={getImageUrl(product.images[selectedImage]) || '/placeholder-product.png'}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -110,7 +111,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                       }`}
                     >
                       <img
-                        src={image}
+                        src={getImageUrl(image)}
                         alt={`${product.name} ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -211,7 +212,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     <div className="flex-shrink-0">
                       {product.seller?.avatar ? (
                         <img
-                          src={product.seller.avatar}
+                          src={getImageUrl(product.seller.avatar)}
                           alt={getSellerDisplayName()}
                           className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
                         />

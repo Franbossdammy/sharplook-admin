@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Star, MapPin, Clock, Calendar, User, Mail, Tag, Trash2, Upload } from 'lucide-react';
 import { Service } from '@/types/service.types';
+import { getImageUrl as toCompatibleUrl } from '@/utils/image';
 
 interface ServiceDetailsModalProps {
   isOpen: boolean;
@@ -29,8 +30,8 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
 
   // Helper to get image URL from either string or object format
   const getImageUrl = (img: any): string => {
-    if (typeof img === 'string') return img;
-    return img?.url || '';
+    const raw = typeof img === 'string' ? img : (img?.url || '');
+    return toCompatibleUrl(raw);
   };
 
   const getImageId = (img: any): string => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getImageUrl } from '@/utils/image';
 import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download } from 'lucide-react';
 import { userService, GetUsersParams } from '@/services/user.service';
 import { analyticsService } from '@/services/analytics.service';
@@ -366,7 +367,7 @@ export const UsersPage: React.FC = () => {
                           <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {user.avatar ? (
                               <img
-                                src={user.avatar}
+                                src={getImageUrl(user.avatar)}
                                 alt={user.firstName}
                                 className="w-full h-full object-cover"
                               />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getImageUrl } from '@/utils/image';
 import {
   X,
   Package,
@@ -284,7 +285,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isO
                   >
                     {item.product.images && item.product.images[0] && (
                       <img
-                        src={item.product.images[0]}
+                        src={getImageUrl(item.product.images[0])}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, MapPin, Clock, Trash2, Eye, CheckCircle, XCircle, Image as ImageIcon } from 'lucide-react';
 import { Service } from '@/types/service.types';
+import { getImageUrl } from '@/utils/image';
 
 interface ServiceCardProps {
   service: Service;
@@ -74,7 +75,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         <div className="relative h-48 bg-gray-100">
           {service.images && service.images.length > 0 ? (
             <img
-              src={typeof service.images[0] === 'string' ? service.images[0] : (service.images[0] as any)?.url}
+              src={getImageUrl(typeof service.images[0] === 'string' ? service.images[0] : (service.images[0] as any)?.url)}
               alt={title}
               className="w-full h-full object-cover"
             />

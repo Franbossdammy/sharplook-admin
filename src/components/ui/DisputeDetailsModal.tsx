@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getImageUrl } from '@/utils/image';
 import {
   X,
   Send,
@@ -464,7 +465,7 @@ export const DisputeDetailsModal: React.FC<DisputeDetailsModalProps> = ({
                     <p className="text-sm font-medium text-gray-700 mb-2">Disputed Product</p>
                     <div className="flex items-center gap-3">
                       {(dispute as ProductDispute).product?.images?.[0] && (
-                        <img src={(dispute as ProductDispute).product!.images![0]} alt="Product" className="w-16 h-16 object-cover rounded-lg border" />
+                        <img src={getImageUrl((dispute as ProductDispute).product!.images![0])} alt="Product" className="w-16 h-16 object-cover rounded-lg border" />
                       )}
                       <p className="text-sm font-medium text-gray-900">{(dispute as ProductDispute).product?.name}</p>
                     </div>
@@ -596,7 +597,7 @@ export const DisputeDetailsModal: React.FC<DisputeDetailsModalProps> = ({
                         <p className="text-xs text-gray-600 mb-2">Type: {ev.type}</p>
                         {ev.type === 'image' ? (
                           <img
-                            src={ev.content}
+                            src={getImageUrl(ev.content)}
                             alt="Evidence"
                             className="w-full h-48 object-cover rounded-lg"
                           />
@@ -619,7 +620,7 @@ export const DisputeDetailsModal: React.FC<DisputeDetailsModalProps> = ({
                           Evidence {index + 1}
                         </p>
                         <img
-                          src={url}
+                          src={getImageUrl(url)}
                           alt="Evidence"
                           className="w-full h-48 object-cover rounded-lg"
                         />

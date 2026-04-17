@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getImageUrl } from '@/utils/image';
 import {
   Star,
   Search,
@@ -578,7 +579,7 @@ export const ReviewsPage: React.FC = () => {
                       <p className="text-xs font-medium text-gray-500 mb-2">Images</p>
                       <div className="flex gap-2 flex-wrap">
                         {selectedReview.images.map((img, i) => (
-                          <img key={i} src={img} alt={`Review image ${i + 1}`} className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
+                          <img key={i} src={getImageUrl(img)} alt={`Review image ${i + 1}`} className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
                         ))}
                       </div>
                     </div>

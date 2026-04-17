@@ -3,6 +3,7 @@ import { X, Mail, Phone, MapPin, Calendar, Clock, Star, CheckCircle, XCircle, Br
 import { User } from '@/types';
 import { userService } from '@/services/user.service';
 import { Loading } from '@/components/ui/Loading';
+import { getImageUrl } from '@/utils/image';
 import { Card } from '@/components/ui/Card';
 
 interface UserDetailsModalProps {
@@ -140,7 +141,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                 <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {userDetails.avatar ? (
                     <img
-                      src={userDetails.avatar}
+                      src={getImageUrl(userDetails.avatar)}
                       alt={userDetails.fullName || userDetails.firstName}
                       className="w-full h-full object-cover"
                     />
@@ -619,7 +620,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                               {service.images.map((img: string, idx: number) => (
                                 <img
                                   key={idx}
-                                  src={img}
+                                  src={getImageUrl(img)}
                                   alt={`Service ${idx + 1}`}
                                   className="w-20 h-20 object-cover rounded border border-gray-200"
                                 />
@@ -659,7 +660,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                               <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-3">
                                 {review.reviewer?.avatar ? (
                                   <img
-                                    src={review.reviewer.avatar}
+                                    src={getImageUrl(review.reviewer.avatar)}
                                     alt={review.reviewer.firstName}
                                     className="w-full h-full rounded-full object-cover"
                                   />

@@ -1,8 +1,9 @@
 import React from 'react';
-import { 
-  Package, 
-  Trash2, 
-  Eye, 
+import { getImageUrl } from '@/utils/image';
+import {
+  Package,
+  Trash2,
+  Eye,
   CheckCircle, 
   XCircle, 
   Star,
@@ -125,7 +126,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Product Image */}
         <div className="relative h-48 bg-gray-100">
           <img
-            src={mainImage}
+            src={getImageUrl(mainImage)}
             alt={product.name}
             className="w-full h-full object-cover"
             onError={(e) => {
@@ -199,7 +200,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <div className="flex-shrink-0">
                 {product.seller?.avatar ? (
                   <img
-                    src={product.seller.avatar}
+                    src={getImageUrl(product.seller.avatar)}
                     alt={getSellerDisplayName()}
                     className="w-10 h-10 rounded-full object-cover"
                   />

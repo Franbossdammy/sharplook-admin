@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getImageUrl } from '@/utils/image';
 import {
   X,
   Megaphone,
@@ -254,7 +255,7 @@ export const OfferDetailsModal: React.FC<OfferDetailsModalProps> = ({ offer, isO
                       {offer.images.map((image, index) => (
                         <img
                           key={index}
-                          src={image}
+                          src={getImageUrl(image)}
                           alt={`Offer image ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg"
                         />
