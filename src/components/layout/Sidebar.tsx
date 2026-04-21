@@ -22,6 +22,7 @@ import {
   Shield,
   FileText,
   Settings,
+  PlusCircle,
   LucideIcon,
 } from 'lucide-react';
 import { ROUTES } from '@/utils/constants';
@@ -48,6 +49,7 @@ const navItems: NavItem[] = [
   { id: 'disputes', label: 'Disputes', icon: MessageSquare, path: ROUTES.DISPUTES, allowedRoles: ['super_admin', 'admin', 'support'] },
   { id: 'transactions', label: 'Transactions', icon: CreditCard, path: ROUTES.TRANSACTIONS, allowedRoles: ['super_admin', 'admin', 'financial_admin'] },
   { id: 'withdrawals', label: 'Withdrawals', icon: Wallet, path: ROUTES.WITHDRAWALS, allowedRoles: ['super_admin', 'admin', 'financial_admin'] },
+  { id: 'wallet-topup', label: 'Wallet Top-Up', icon: PlusCircle, path: ROUTES.WALLET_TOPUP, allowedRoles: ['super_admin', 'admin', 'financial_admin'] },
   { id: 'notifications', label: 'Notifications', icon: Bell, path: ROUTES.NOTIFICATIONS, allowedRoles: ['super_admin', 'admin'] },
   { id: 'referrals', label: 'Referrals', icon: Gift, path: ROUTES.REFERRALS, allowedRoles: ['super_admin', 'admin'] },
   { id: 'subscriptions', label: 'Subscriptions', icon: Crown, path: ROUTES.SUBSCRIPTIONS, allowedRoles: ['super_admin', 'admin', 'financial_admin'] },

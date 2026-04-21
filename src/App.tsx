@@ -26,6 +26,7 @@ import { AuditLogsPage } from './pages/AuditLogsPage';
 import { AdminManagementPage } from './pages/AdminManagementPage';
 import { BlogPage } from './pages/BlogPage';
 import { AppSettingsPage } from './pages/AppSettingsPage';
+import { WalletTopUpPage } from './pages/WalletTopUpPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -295,6 +296,18 @@ const AppRoutes: React.FC = () => {
             <MainLayout>
               <RoleBasedRoute allowedRoles={['admin']}>
                 <AuditLogsPage />
+              </RoleBasedRoute>
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.WALLET_TOPUP}
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <RoleBasedRoute allowedRoles={['admin', 'financial_admin']}>
+                <WalletTopUpPage />
               </RoleBasedRoute>
             </MainLayout>
           </ProtectedRoute>

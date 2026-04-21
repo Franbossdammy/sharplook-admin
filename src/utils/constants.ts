@@ -105,6 +105,10 @@ export const API_ENDPOINTS = {
   // Audit Logs
   AUDIT_LOGS: '/audit-logs',
 
+  // Wallet Admin
+  WALLET_CREDIT: '/payments/wallet/fund/credit',
+  WALLET_DEBIT: '/payments/wallet/fund/debit',
+
   // Blog
   BLOG_ADMIN: '/blog/admin',
   BLOG_ADMIN_PENDING: '/blog/admin/pending',
@@ -147,6 +151,7 @@ export const ROUTES = {
   SUBSCRIPTIONS: '/subscriptions',
   ADMIN_MANAGEMENT: '/admin-management',
   AUDIT_LOGS: '/audit-logs',
+  WALLET_TOPUP: '/wallet-topup',
   BLOG: '/blog',
   APP_SETTINGS: '/app-settings',
 } as const;
