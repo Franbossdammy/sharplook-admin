@@ -940,7 +940,11 @@ export const BookingsPage: React.FC = () => {
                       {booking.service?.name || 'N/A'}
                     </p>
                     {booking.service?.category && (
-                      <p className="text-xs text-gray-600 truncate">{booking.service.category}</p>
+                      <p className="text-xs text-gray-600 truncate">
+                        {typeof booking.service.category === 'object'
+                          ? booking.service.category.name
+                          : booking.service.category}
+                      </p>
                     )}
                   </div>
                   <div className="col-span-2">
