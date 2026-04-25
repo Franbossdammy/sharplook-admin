@@ -150,6 +150,22 @@ export const useProducts = () => {
     }
   };
 
+  const updateProduct = async (productId: string, data: FormData): Promise<boolean> => {
+    try {
+      const response = await productService.updateProduct(productId, data);
+      const updatedProduct = response.data.product || response.data;
+      setProducts((prev) =>
+        prev.map((product) => (product.id === productId ? updatedProduct : product))
+      );
+      toast.success('Product updated successfully');
+      return true;
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || 'Failed to update product';
+      toast.error(errorMessage);
+      return false;
+    }
+  };
+
   const updateStock = async (productId: string, quantity: number): Promise<boolean> => {
     try {
       const response = await productService.updateStock(productId, { quantity });
@@ -179,6 +195,7 @@ export const useProducts = () => {
     featureProduct,
     sponsorProduct,
     searchProducts,
+    updateProduct,
     updateStock,
     refetch: fetchProducts,
   };

@@ -4,15 +4,16 @@ import {
   Package,
   Trash2,
   Eye,
-  CheckCircle, 
-  XCircle, 
+  CheckCircle,
+  XCircle,
   Star,
   TrendingUp,
   ShoppingCart,
   AlertCircle,
   User,
   BadgeCheck,
-  Store
+  Store,
+  Pencil,
 } from 'lucide-react';
 import { Product } from '@/types/product.types';
 
@@ -24,6 +25,7 @@ interface ProductCardProps {
   onViewDetails: (product: Product) => void;
   onFeature?: (productId: string) => void;
   onSponsor?: (productId: string) => void;
+  onEdit?: (product: Product) => void;
   showApprovalActions?: boolean;
 }
 
@@ -35,6 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onViewDetails,
   onFeature,
   onSponsor,
+  onEdit,
   showApprovalActions = false,
 }) => {
   const [showRejectModal, setShowRejectModal] = React.useState(false);
@@ -320,6 +323,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <Eye className="w-4 h-4" />
                   View Details
                 </button>
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(product)}
+                    className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                    title="Edit Product"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                )}
                 {onFeature && product.approvalStatus === 'approved' && (
                   <button
                     onClick={() => onFeature(product.id)}

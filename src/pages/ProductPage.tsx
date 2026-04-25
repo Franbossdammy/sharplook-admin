@@ -21,6 +21,7 @@ import { ProductCard } from '@/components/ui/ProductCard';
 import { ProductDetailsModal } from '@/components/ui/ProductDetailsModal';
 import { FeatureProductModal } from '@/components/ui/FeatureProductModal';
 import { SponsorProductModal } from '@/components/ui/SponsorProductModal';
+import { EditProductModal } from '@/components/ui/EditProductModal';
 import { Loading } from '@/components/ui/Loading';
 import { StatCard } from '@/components/ui/StatCard';
 
@@ -36,6 +37,7 @@ export const ProductsPage: React.FC = () => {
     featureProduct,
     sponsorProduct,
     searchProducts,
+    updateProduct,
     refetch,
   } = useProducts();
 
@@ -59,6 +61,8 @@ export const ProductsPage: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(false);
   const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [productToFeature, setProductToFeature] = useState<string | null>(null);
   const [productToSponsor, setProductToSponsor] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -82,6 +86,19 @@ export const ProductsPage: React.FC = () => {
   const handleCloseDetails = () => {
     setIsDetailsModalOpen(false);
     setSelectedProduct(null);
+  };
+
+  const handleEditClick = (product: Product) => {
+    setProductToEdit(product);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (productId: string, data: FormData): Promise<boolean> => {
+    const success = await updateProduct(productId, data);
+    if (success) {
+      refetch();
+    }
+    return success;
   };
 
   const handleApprove = async (productId: string): Promise<boolean> => {
@@ -399,6 +416,7 @@ export const ProductsPage: React.FC = () => {
               onViewDetails={handleViewDetails}
               onFeature={handleFeatureClick}
               onSponsor={handleSponsorClick}
+              onEdit={handleEditClick}
               showApprovalActions={product.approvalStatus === 'pending'}
             />
           ))}
@@ -432,6 +450,17 @@ export const ProductsPage: React.FC = () => {
           setProductToSponsor(null);
         }}
         onSubmit={handleSponsorSubmit}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setProductToEdit(null);
+        }}
+        product={productToEdit}
+        onSubmit={handleEditSubmit}
       />
     </div>
   );
