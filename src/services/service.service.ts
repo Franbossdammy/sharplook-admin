@@ -10,9 +10,15 @@ import {
 } from '@/types/service.types';
 
 export class ServiceService {
-  // Get all services
-  async getAllServices(): Promise<ServicesResponse> {
-    return await apiService.get<ServicesResponse>(API_ENDPOINTS.SERVICES);
+  // Get all services with pagination and optional approval status filter
+  async getAllServices(
+    page: number = 1,
+    limit: number = 20,
+    approvalStatus?: 'pending' | 'approved' | 'rejected'
+  ): Promise<ServicesResponse> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (approvalStatus) params.append('approvalStatus', approvalStatus);
+    return await apiService.get<ServicesResponse>(`${API_ENDPOINTS.SERVICES}?${params.toString()}`);
   }
 
   // Search services
@@ -61,8 +67,10 @@ export class ServiceService {
   }
 
   // Get pending services
-  async getPendingServices(): Promise<ServicesResponse> {
-    return await apiService.get<ServicesResponse>(`${API_ENDPOINTS.SERVICES}/admin/pending`);
+  async getPendingServices(page: number = 1, limit: number = 20): Promise<ServicesResponse> {
+    return await apiService.get<ServicesResponse>(
+      `${API_ENDPOINTS.SERVICES}/admin/pending?page=${page}&limit=${limit}`
+    );
   }
 
   // Approve service

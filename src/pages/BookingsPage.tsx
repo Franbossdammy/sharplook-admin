@@ -16,9 +16,22 @@ import {
   User,
   Star,
   Briefcase,
+  MapPin,
+  Phone,
+  Mail,
+  CreditCard,
+  AlertTriangle,
+  ArrowRightLeft,
+  Hash,
+  Navigation,
+  MessageSquare,
+  History,
+  Package,
+  Building2,
 } from 'lucide-react';
 import { bookingService } from '../services/booking.service';
 import { Booking, BookingFilters, BookingStats } from '../types/booking.types';
+import { getImageUrl } from '@/utils/image';
 
 // ==================== Booking Details Modal ====================
 
@@ -28,329 +41,469 @@ interface BookingDetailsModalProps {
   onClose: () => void;
 }
 
+type ModalTab = 'overview' | 'schedule' | 'payment' | 'activity' | 'notes';
+
 const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ booking, isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'details' | 'payment' | 'review'>('details');
+  const [activeTab, setActiveTab] = useState<ModalTab>('overview');
 
   if (!isOpen) return null;
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const fmt = (date?: string) =>
+    date
+      ? new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'short', day: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+        })
+      : '—';
 
-  const formatCurrency = (amount?: number) => `₦${(amount || 0).toLocaleString()}`;
+  const fmtCurrency = (amount?: number) =>
+    amount != null ? `₦${amount.toLocaleString()}` : '—';
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'accepted':
-        return 'bg-blue-100 text-blue-700';
-      case 'in_progress':
-        return 'bg-purple-100 text-purple-700';
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'cancelled':
-        return 'bg-red-100 text-red-700';
-      case 'rejected':
-        return 'bg-orange-100 text-orange-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
+  const statusColor = (s: string) => {
+    switch (s) {
+      case 'pending':       return 'bg-yellow-100 text-yellow-700';
+      case 'accepted':      return 'bg-blue-100 text-blue-700';
+      case 'in_progress':   return 'bg-purple-100 text-purple-700';
+      case 'completed':     return 'bg-green-100 text-green-700';
+      case 'cancelled':     return 'bg-red-100 text-red-700';
+      case 'rejected':      return 'bg-orange-100 text-orange-700';
+      case 'disputed':      return 'bg-rose-100 text-rose-700';
+      default:              return 'bg-gray-100 text-gray-700';
     }
   };
 
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'released':
-      case 'paid':
-        return 'bg-green-100 text-green-700';
-      case 'escrowed':
-        return 'bg-blue-100 text-blue-700';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'refunded':
-        return 'bg-red-100 text-red-700';
-      case 'partially_refunded':
-        return 'bg-orange-100 text-orange-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
+  const payStatusColor = (s?: string) => {
+    switch (s) {
+      case 'released': case 'paid': return 'bg-green-100 text-green-700';
+      case 'escrowed':              return 'bg-blue-100 text-blue-700';
+      case 'pending':               return 'bg-yellow-100 text-yellow-700';
+      case 'refunded':              return 'bg-red-100 text-red-700';
+      case 'partially_refunded':    return 'bg-orange-100 text-orange-700';
+      default:                      return 'bg-gray-100 text-gray-700';
     }
   };
+
+  const serviceImage = booking.service?.images?.[0];
+  const categoryName = typeof booking.service?.category === 'object'
+    ? booking.service.category?.name
+    : booking.service?.category;
+
+  const tabs: { id: ModalTab; label: string }[] = [
+    { id: 'overview',  label: 'Overview'  },
+    { id: 'schedule',  label: 'Schedule & Location' },
+    { id: 'payment',   label: 'Payment'   },
+    { id: 'activity',  label: 'Activity'  },
+    { id: 'notes',     label: 'Notes & Review' },
+  ];
+
+  const Row = ({ label, value }: { label: string; value?: React.ReactNode }) =>
+    value ? (
+      <div className="flex justify-between items-start py-2 border-b border-gray-100 last:border-0">
+        <span className="text-sm text-gray-500 flex-shrink-0 w-40">{label}</span>
+        <span className="text-sm font-medium text-gray-900 text-right">{value}</span>
+      </div>
+    ) : null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Background overlay */}
-        <div
-          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-          onClick={onClose}
-        ></div>
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 sm:p-0">
+        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
-        {/* Modal panel */}
-        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-auto my-8 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-primary-600 to-pink-600 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-lg">
-                <CalendarDays className="w-6 h-6 text-white" />
+                <CalendarDays className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white">Booking Details</h3>
-                <p className="text-sm text-white/80">#{booking._id.slice(-8).toUpperCase()}</p>
+                <h3 className="text-base font-semibold text-white">Booking Details</h3>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs text-white/80 font-mono">#{booking._id.slice(-8).toUpperCase()}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(booking.status)} bg-white/90`}>
+                    {booking.status.replace(/_/g, ' ')}
+                  </span>
+                  {booking.bookingType === 'offer_based' && (
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-white/90 text-indigo-700">
+                      Offer-Based
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
-            >
+            <button onClick={onClose} className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200 bg-gray-50 px-6">
-            <div className="flex gap-1">
-              <button
-                onClick={() => setActiveTab('details')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'details'
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Booking Details
-              </button>
-              <button
-                onClick={() => setActiveTab('payment')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'payment'
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Payment Info
-              </button>
-              {booking.review && (
+          <div className="border-b border-gray-200 bg-gray-50 px-4 overflow-x-auto">
+            <div className="flex gap-0 min-w-max">
+              {tabs.map(t => (
                 <button
-                  onClick={() => setActiveTab('review')}
-                  className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === 'review'
+                  key={t.id}
+                  onClick={() => setActiveTab(t.id)}
+                  className={`px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                    activeTab === t.id
                       ? 'border-primary-600 text-primary-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      : 'border-transparent text-gray-500 hover:text-gray-800'
                   }`}
                 >
-                  Review
+                  {t.label}
                 </button>
-              )}
+              ))}
             </div>
           </div>
 
-          {/* Content */}
-          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
-            {/* Details Tab */}
-            {activeTab === 'details' && (
-              <div className="space-y-6">
-                {/* Status */}
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Current Status</p>
-                  <span
-                    className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(
-                      booking.status
-                    )}`}
-                  >
-                    {booking.status.replace(/_/g, ' ')}
-                  </span>
-                  {booking.paymentStatus && (
-                    <span
-                      className={`ml-2 inline-block px-3 py-1 text-sm font-medium rounded-full ${getPaymentStatusColor(
-                        booking.paymentStatus
-                      )}`}
-                    >
-                      {booking.paymentStatus.replace(/_/g, ' ')}
-                    </span>
-                  )}
-                </div>
+          {/* Body */}
+          <div className="px-6 py-5 max-h-[65vh] overflow-y-auto space-y-5">
 
-                {/* Service */}
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" />
-                    Service
-                  </p>
-                  <p className="font-medium text-gray-900">{booking.service?.name || 'N/A'}</p>
-                  {booking.service?.category && (
-                    <p className="text-sm text-gray-600 mt-1">Category: {booking.service.category}</p>
+            {/* ── OVERVIEW ─────────────────────────────────── */}
+            {activeTab === 'overview' && (
+              <div className="space-y-5">
+                {/* Service card */}
+                <div className="flex gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  {serviceImage ? (
+                    <img
+                      src={getImageUrl(serviceImage)}
+                      alt={booking.service?.name}
+                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                      onError={e => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
+                      <Package className="w-8 h-8 text-primary-400" />
+                    </div>
                   )}
-                  <p className="text-sm text-primary-600 mt-1">
-                    Price: {formatCurrency(booking.service?.basePrice || booking.servicePrice)}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-1">Service</p>
+                    <p className="font-semibold text-gray-900 text-base">{booking.service?.name || '—'}</p>
+                    {categoryName && <p className="text-sm text-gray-500 mt-0.5">{categoryName}</p>}
+                    <p className="text-sm font-bold text-primary-600 mt-1">
+                      {fmtCurrency(booking.service?.basePrice ?? booking.servicePrice)}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Client & Vendor */}
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Client
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Client */}
+                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-3 flex items-center gap-1">
+                      <User className="w-3.5 h-3.5" /> Client
                     </p>
-                    <p className="font-medium text-gray-900">
+                    {booking.client?.avatar && (
+                      <img src={getImageUrl(booking.client.avatar)} className="w-10 h-10 rounded-full object-cover mb-2" alt="" />
+                    )}
+                    <p className="font-semibold text-gray-900">
                       {booking.client?.firstName} {booking.client?.lastName}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">{booking.client?.email}</p>
+                    {booking.client?.email && (
+                      <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                        <Mail className="w-3 h-3" /> {booking.client.email}
+                      </p>
+                    )}
                     {booking.client?.phone && (
-                      <p className="text-sm text-gray-600">{booking.client.phone}</p>
+                      <p className="text-sm text-gray-600 flex items-center gap-1 mt-0.5">
+                        <Phone className="w-3 h-3" /> {booking.client.phone}
+                      </p>
                     )}
                   </div>
 
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                      <Briefcase className="w-4 h-4" />
-                      Vendor
+                  {/* Vendor */}
+                  <div className="p-4 bg-purple-50 border border-purple-100 rounded-xl">
+                    <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-3 flex items-center gap-1">
+                      <Building2 className="w-3.5 h-3.5" /> Vendor
                     </p>
-                    <p className="font-medium text-gray-900">
-                      {booking.vendor?.firstName} {booking.vendor?.lastName}
+                    {booking.vendor?.avatar && (
+                      <img src={getImageUrl(booking.vendor.avatar)} className="w-10 h-10 rounded-full object-cover mb-2" alt="" />
+                    )}
+                    <p className="font-semibold text-gray-900">
+                      {booking.vendor?.vendorProfile?.businessName ||
+                        `${booking.vendor?.firstName} ${booking.vendor?.lastName}`}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">{booking.vendor?.email}</p>
+                    {booking.vendor?.vendorProfile?.businessName && (
+                      <p className="text-xs text-gray-500">
+                        {booking.vendor.firstName} {booking.vendor.lastName}
+                      </p>
+                    )}
+                    {booking.vendor?.email && (
+                      <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                        <Mail className="w-3 h-3" /> {booking.vendor.email}
+                      </p>
+                    )}
                     {booking.vendor?.phone && (
-                      <p className="text-sm text-gray-600">{booking.vendor.phone}</p>
+                      <p className="text-sm text-gray-600 flex items-center gap-1 mt-0.5">
+                        <Phone className="w-3 h-3" /> {booking.vendor.phone}
+                      </p>
                     )}
                   </div>
                 </div>
 
-                {/* Schedule Info */}
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm font-medium text-blue-700 mb-2 flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4" />
-                    Schedule
-                  </p>
-                  <p className="text-sm text-gray-900">
-                    <span className="font-medium">Date:</span> {formatDate(booking.scheduledDate)}
-                  </p>
-                  {booking.scheduledTime && (
-                    <p className="text-sm text-gray-900">
-                      <span className="font-medium">Time:</span> {booking.scheduledTime}
-                    </p>
+                {/* Quick summary */}
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <Row label="Booking Type"     value={booking.bookingType === 'offer_based' ? 'Offer-Based' : 'Standard'} />
+                  <Row label="Booking Status"   value={<span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(booking.status)}`}>{booking.status.replace(/_/g,'  ')}</span>} />
+                  <Row label="Payment Status"   value={<span className={`px-2 py-0.5 rounded-full text-xs font-medium ${payStatusColor(booking.paymentStatus)}`}>{booking.paymentStatus?.replace(/_/g,' ')}</span>} />
+                  <Row label="Total Amount"     value={<span className="font-bold text-primary-600">{fmtCurrency(booking.totalAmount)}</span>} />
+                  <Row label="Created"          value={fmt(booking.createdAt)} />
+                  <Row label="Last Updated"     value={fmt(booking.updatedAt)} />
+                  {booking.hasDispute && (
+                    <div className="flex items-center gap-2 mt-2 p-2 bg-rose-50 border border-rose-200 rounded-lg">
+                      <AlertTriangle className="w-4 h-4 text-rose-600" />
+                      <span className="text-sm font-medium text-rose-700">This booking has an active dispute</span>
+                    </div>
                   )}
-                  {booking.duration && (
-                    <p className="text-sm text-gray-900">
-                      <span className="font-medium">Duration:</span> {booking.duration} minutes
-                    </p>
-                  )}
-                </div>
-
-                {/* Notes */}
-                {booking.notes && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Notes</p>
-                    <p className="text-sm text-gray-600">{booking.notes}</p>
-                  </div>
-                )}
-
-                {/* Cancellation Reason */}
-                {booking.cancellationReason && (
-                  <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                    <p className="text-sm font-medium text-red-700 mb-2">Cancellation Reason</p>
-                    <p className="text-sm text-gray-600">{booking.cancellationReason}</p>
-                  </div>
-                )}
-
-                {/* Dates */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-600">Created</p>
-                    <p className="font-medium text-gray-900">{formatDate(booking.createdAt)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Last Updated</p>
-                    <p className="font-medium text-gray-900">{formatDate(booking.updatedAt)}</p>
-                  </div>
                 </div>
               </div>
             )}
 
-            {/* Payment Tab */}
+            {/* ── SCHEDULE & LOCATION ──────────────────────── */}
+            {activeTab === 'schedule' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                  <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-3 flex items-center gap-1">
+                    <CalendarDays className="w-3.5 h-3.5" /> Schedule
+                  </p>
+                  <Row label="Scheduled Date" value={fmt(booking.scheduledDate)} />
+                  <Row label="Time"           value={booking.scheduledTime} />
+                  <Row label="Duration"       value={booking.duration ? `${booking.duration} minutes` : undefined} />
+                  <Row label="Accepted At"    value={booking.acceptedAt ? fmt(booking.acceptedAt) : undefined} />
+                  <Row label="Completed At"   value={booking.completedAt ? fmt(booking.completedAt) : undefined} />
+                  <Row label="Completed By"   value={booking.completedBy} />
+                </div>
+
+                {/* Completion tracking */}
+                {(booking.clientMarkedComplete !== undefined || booking.vendorMarkedComplete !== undefined) && (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3">Completion Confirmation</p>
+                    <div className="flex gap-4">
+                      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${booking.clientMarkedComplete ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        <CheckCircle className="w-4 h-4" />
+                        Client {booking.clientMarkedComplete ? 'confirmed' : 'pending'}
+                      </div>
+                      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${booking.vendorMarkedComplete ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        <CheckCircle className="w-4 h-4" />
+                        Vendor {booking.vendorMarkedComplete ? 'confirmed' : 'pending'}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Location */}
+                {booking.location?.address ? (
+                  <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
+                    <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-3 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5" /> Service Location (Home Service)
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">{booking.location.address}</p>
+                    <p className="text-sm text-gray-600 mt-0.5">
+                      {booking.location.city}{booking.location.state ? `, ${booking.location.state}` : ''}
+                    </p>
+                    {booking.location.coordinates?.[0] != null && (
+                      <a
+                        href={`https://maps.google.com/?q=${booking.location.coordinates[1]},${booking.location.coordinates[0]}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 mt-2 text-xs text-primary-600 hover:text-primary-800 font-medium"
+                      >
+                        <Navigation className="w-3 h-3" /> View on Google Maps
+                      </a>
+                    )}
+                    {booking.distanceCharge > 0 && (
+                      <p className="text-sm text-gray-600 mt-2">
+                        Distance charge: <span className="font-semibold text-gray-900">{fmtCurrency(booking.distanceCharge)}</span>
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center text-sm text-gray-500">
+                    <MapPin className="w-6 h-6 text-gray-300 mx-auto mb-1" />
+                    No location recorded — likely an in-shop service
+                  </div>
+                )}
+
+                {/* Offer info */}
+                {booking.bookingType === 'offer_based' && booking.offer && (
+                  <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+                    <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                      <ArrowRightLeft className="w-3.5 h-3.5" /> Offer Details
+                    </p>
+                    <Row label="Offer ID"    value={typeof booking.offer === 'object' ? booking.offer._id?.slice(-8).toUpperCase() : String(booking.offer).slice(-8).toUpperCase()} />
+                    {typeof booking.offer === 'object' && booking.offer.title && <Row label="Title" value={booking.offer.title} />}
+                    {typeof booking.offer === 'object' && booking.offer.price && <Row label="Offer Price" value={fmtCurrency(booking.offer.price)} />}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── PAYMENT ──────────────────────────────────── */}
             {activeTab === 'payment' && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-1">Total Amount</p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {formatCurrency(booking.totalAmount)}
-                    </p>
+                {/* Payment status banner */}
+                <div className={`flex items-center gap-3 p-4 rounded-xl border ${payStatusColor(booking.paymentStatus)}`}>
+                  <CreditCard className="w-5 h-5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold capitalize">{booking.paymentStatus?.replace(/_/g, ' ')} payment</p>
+                    {booking.paymentReference && (
+                      <p className="text-xs mt-0.5 opacity-80 font-mono">Ref: {booking.paymentReference}</p>
+                    )}
                   </div>
-                  {booking.platformFee !== undefined && (
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">Platform Fee</p>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {formatCurrency(booking.platformFee)}
-                      </p>
-                    </div>
-                  )}
-                  {booking.vendorEarnings !== undefined && (
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">Vendor Earnings</p>
-                      <p className="text-lg font-semibold text-green-700">
-                        {formatCurrency(booking.vendorEarnings)}
-                      </p>
-                    </div>
-                  )}
-                  {booking.paymentMethod && (
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">Payment Method</p>
-                      <p className="text-lg font-semibold text-gray-900 capitalize">
-                        {booking.paymentMethod}
-                      </p>
-                    </div>
-                  )}
                 </div>
-                {booking.paymentStatus && (
-                  <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
-                    <p className="text-sm text-primary-700 mb-1">Payment Status</p>
-                    <span
-                      className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${getPaymentStatusColor(
-                        booking.paymentStatus
-                      )}`}
-                    >
-                      {booking.paymentStatus.replace(/_/g, ' ')}
-                    </span>
+
+                {/* Breakdown */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Price Breakdown</p>
+                  <Row label="Service Price"    value={fmtCurrency(booking.servicePrice)} />
+                  {booking.distanceCharge > 0 && (
+                    <Row label="Distance Charge" value={fmtCurrency(booking.distanceCharge)} />
+                  )}
+                  {booking.cancellationPenalty != null && booking.cancellationPenalty > 0 && (
+                    <Row label="Cancellation Penalty" value={fmtCurrency(booking.cancellationPenalty)} />
+                  )}
+                  <div className="flex justify-between items-center pt-2 mt-1 border-t border-gray-200">
+                    <span className="text-sm font-bold text-gray-900">Total</span>
+                    <span className="text-base font-bold text-primary-600">{fmtCurrency(booking.totalAmount)}</span>
+                  </div>
+                </div>
+
+                {/* Earnings */}
+                {(booking.platformFee != null || booking.vendorEarnings != null) && (
+                  <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Distribution</p>
+                    <Row label="Platform Fee"    value={booking.platformFee != null ? fmtCurrency(booking.platformFee) : undefined} />
+                    <Row label="Vendor Earnings" value={booking.vendorEarnings != null ? <span className="text-green-700 font-bold">{fmtCurrency(booking.vendorEarnings)}</span> : undefined} />
                   </div>
                 )}
+
+                {/* Method & reference */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Payment Details</p>
+                  <Row label="Payment Method"    value={booking.paymentMethod ? <span className="capitalize">{booking.paymentMethod}</span> : undefined} />
+                  <Row label="Payment Reference" value={booking.paymentReference ? <span className="font-mono text-xs">{booking.paymentReference}</span> : undefined} />
+                  <Row label="Payment ID"        value={booking.paymentId ? <span className="font-mono text-xs">{String(booking.paymentId).slice(-10).toUpperCase()}</span> : undefined} />
+                  <Row label="Expires At"        value={booking.paymentExpiresAt ? fmt(booking.paymentExpiresAt) : undefined} />
+                </div>
               </div>
             )}
 
-            {/* Review Tab */}
-            {activeTab === 'review' && booking.review && (
+            {/* ── ACTIVITY ─────────────────────────────────── */}
+            {activeTab === 'activity' && (
               <div className="space-y-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                    <Star className="w-4 h-4" />
-                    Rating
-                  </p>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-5 h-5 ${
-                          star <= booking.review!.rating
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm font-medium text-gray-700">
-                      {booking.review.rating}/5
-                    </span>
+                {/* Cancellation */}
+                {booking.cancellationReason && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                      <XCircle className="w-3.5 h-3.5" /> Cancellation
+                    </p>
+                    <Row label="Reason"       value={booking.cancellationReason} />
+                    <Row label="Cancelled At" value={booking.cancelledAt ? fmt(booking.cancelledAt) : undefined} />
+                    {booking.cancellationPenalty != null && booking.cancellationPenalty > 0 && (
+                      <Row label="Penalty" value={fmtCurrency(booking.cancellationPenalty)} />
+                    )}
                   </div>
+                )}
+
+                {/* Dispute */}
+                {booking.hasDispute && (
+                  <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl">
+                    <p className="text-xs font-semibold text-rose-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Dispute
+                    </p>
+                    <p className="text-sm text-rose-700">This booking has an active dispute.</p>
+                    {booking.disputeId && (
+                      <p className="text-xs text-rose-500 font-mono mt-1">ID: {String(booking.disputeId).slice(-8).toUpperCase()}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Status history timeline */}
+                {booking.statusHistory && booking.statusHistory.length > 0 ? (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-1">
+                      <History className="w-3.5 h-3.5" /> Status History
+                    </p>
+                    <div className="relative pl-6">
+                      <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200" />
+                      {[...booking.statusHistory].reverse().map((h, i) => (
+                        <div key={i} className="relative mb-4 last:mb-0">
+                          <div className={`absolute -left-4 w-3 h-3 rounded-full border-2 border-white ${statusColor(h.status).replace('text-', 'bg-').split(' ')[0]}`} />
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor(h.status)}`}>
+                                {h.status.replace(/_/g, ' ')}
+                              </span>
+                              {h.reason && <p className="text-xs text-gray-500 mt-1 ml-1">{h.reason}</p>}
+                            </div>
+                            <p className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">{fmt(h.changedAt)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center text-sm text-gray-400">
+                    <History className="w-6 h-6 text-gray-300 mx-auto mb-1" />
+                    No status history recorded
+                  </div>
+                )}
+
+                {/* Key timestamps */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Timestamps</p>
+                  <Row label="Created"      value={fmt(booking.createdAt)} />
+                  <Row label="Accepted"     value={booking.acceptedAt ? fmt(booking.acceptedAt) : undefined} />
+                  <Row label="Rejected"     value={booking.rejectedAt ? fmt(booking.rejectedAt) : undefined} />
+                  <Row label="Completed"    value={booking.completedAt ? fmt(booking.completedAt) : undefined} />
+                  <Row label="Cancelled"    value={booking.cancelledAt ? fmt(booking.cancelledAt) : undefined} />
+                  <Row label="Last Updated" value={fmt(booking.updatedAt)} />
                 </div>
-                {booking.review.comment && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Comment</p>
-                    <p className="text-sm text-gray-600">{booking.review.comment}</p>
+              </div>
+            )}
+
+            {/* ── NOTES & REVIEW ───────────────────────────── */}
+            {activeTab === 'notes' && (
+              <div className="space-y-4">
+                {/* Client notes */}
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                  <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                    <MessageSquare className="w-3.5 h-3.5" /> Client Notes
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    {booking.clientNotes || booking.notes || <span className="text-gray-400 italic">No notes from client</span>}
+                  </p>
+                </div>
+
+                {/* Vendor notes */}
+                <div className="p-4 bg-purple-50 border border-purple-100 rounded-xl">
+                  <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                    <MessageSquare className="w-3.5 h-3.5" /> Vendor Notes
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    {booking.vendorNotes || <span className="text-gray-400 italic">No notes from vendor</span>}
+                  </p>
+                </div>
+
+                {/* Review */}
+                {booking.review ? (
+                  <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-xl">
+                    <p className="text-xs font-semibold text-yellow-700 uppercase tracking-wide mb-3 flex items-center gap-1">
+                      <Star className="w-3.5 h-3.5" /> Client Review
+                    </p>
+                    <div className="flex items-center gap-1 mb-2">
+                      {[1, 2, 3, 4, 5].map(s => (
+                        <Star key={s} className={`w-5 h-5 ${s <= booking.review!.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'}`} />
+                      ))}
+                      <span className="ml-2 text-sm font-bold text-gray-700">{booking.review.rating}/5</span>
+                    </div>
+                    {booking.review.comment && (
+                      <p className="text-sm text-gray-700 italic">"{booking.review.comment}"</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center text-sm text-gray-400">
+                    <Star className="w-6 h-6 text-gray-300 mx-auto mb-1" />
+                    {booking.hasReview ? 'Review submitted but not populated' : 'No review yet'}
                   </div>
                 )}
               </div>
@@ -358,10 +511,10 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ booking, isOp
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end">
+          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="px-4 py-2 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               Close
             </button>

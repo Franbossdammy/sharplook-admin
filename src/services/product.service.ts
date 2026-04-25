@@ -148,6 +148,16 @@ export class ProductService {
   // ==================== ADMIN ENDPOINTS ====================
 
   /**
+   * Get ALL products for admin (any approval status)
+   * GET /api/v1/products/admin/all
+   */
+  async getAllProductsForAdmin(page: number = 1, limit: number = 20): Promise<ProductsResponse> {
+    return await apiService.get<ProductsResponse>(
+      `${API_ENDPOINTS.PRODUCT_ADMIN_ALL}?page=${page}&limit=${limit}`
+    );
+  }
+
+  /**
    * Get pending products for approval
    * GET /api/v1/products/admin/pending
    */

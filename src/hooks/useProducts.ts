@@ -1,29 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { productService } from '@/services/product.service';
-import { Product, ProductStats, ProductFilters } from '@/types/product.types';
+import { Product, ProductStats } from '@/types/product.types';
 import { toast } from 'react-hot-toast';
 
-export const useProducts = () => {
+const PRODUCTS_PER_PAGE = 20;
+
+export const useProducts = (page: number = 1) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchProducts = useCallback(async (filters?: ProductFilters, page: number = 1, limit: number = 20) => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await productService.getProducts(filters, page, limit);
-
-      console.log("All response:", response);
-      
-      
-      // ✅ Handle both response structures
-      // If data is an array, use it directly. If it's an object with products, extract it
-      const productsData = Array.isArray(response.data) 
-        ? response.data 
-        : response.data.products || [];
-      
+      const response = await productService.getAllProductsForAdmin(page, PRODUCTS_PER_PAGE);
+      const data = response.data as any;
+      const productsData = Array.isArray(data) ? data : data.products || [];
       setProducts(productsData);
+      setTotal(data.total ?? productsData.length);
+      setTotalPages(data.totalPages ?? Math.ceil((data.total ?? productsData.length) / PRODUCTS_PER_PAGE));
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || 'Failed to fetch products';
       setError(errorMessage);
@@ -31,7 +29,7 @@ export const useProducts = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchProducts();
@@ -205,6 +203,9 @@ export const useProducts = () => {
     products,
     loading,
     error,
+    total,
+    totalPages,
+    limit: PRODUCTS_PER_PAGE,
     deleteProduct,
     approveProduct,
     rejectProduct,
@@ -246,33 +247,30 @@ export const useProductStats = () => {
   return { stats, loading, error };
 };
 
-export const usePendingProducts = () => {
+export const usePendingProducts = (page: number = 1) => {
   const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchPendingProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await productService.getPendingProducts();
-
-      console.log("pending response",response);
-      
-      
-      // ✅ Handle both response structures
-      const productsData = Array.isArray(response.data) 
-        ? response.data 
-        : response.data.products || [];
-      
+      const response = await productService.getPendingProducts(page, PRODUCTS_PER_PAGE);
+      const data = response.data as any;
+      const productsData = Array.isArray(data) ? data : data.products || [];
       setPendingProducts(productsData);
+      setTotal(data.total ?? productsData.length);
+      setTotalPages(data.totalPages ?? Math.ceil((data.total ?? productsData.length) / PRODUCTS_PER_PAGE));
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || 'Failed to fetch pending products';
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchPendingProducts();
@@ -282,6 +280,9 @@ export const usePendingProducts = () => {
     pendingProducts,
     loading,
     error,
+    total,
+    totalPages,
+    limit: PRODUCTS_PER_PAGE,
     refetch: fetchPendingProducts,
   };
 };
@@ -347,35 +348,30 @@ export const useSponsoredProducts = () => {
 };
 
 
-export const useRejectedProducts = () => {
+export const useRejectedProducts = (page: number = 1) => {
   const [rejectedProducts, setRejectedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchRejectedProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await productService.getRejectedProducts();
-      
-      console.log('Rejected Products Response:', response); // ✅ Add this debug log
-      
-      // Handle both response structures
-      const productsData = Array.isArray(response.data) 
-        ? response.data 
-        : response.data.products || [];
-      
-      console.log('Rejected Products Data:', productsData); // ✅ Add this debug log
-      
+      const response = await productService.getRejectedProducts(page, PRODUCTS_PER_PAGE);
+      const data = response.data as any;
+      const productsData = Array.isArray(data) ? data : data.products || [];
       setRejectedProducts(productsData);
+      setTotal(data.total ?? productsData.length);
+      setTotalPages(data.totalPages ?? Math.ceil((data.total ?? productsData.length) / PRODUCTS_PER_PAGE));
     } catch (err: any) {
-      console.error('Error fetching rejected products:', err); // ✅ Add this debug log
       const errorMessage = err?.response?.data?.message || 'Failed to fetch rejected products';
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchRejectedProducts();
@@ -385,6 +381,9 @@ export const useRejectedProducts = () => {
     rejectedProducts,
     loading,
     error,
+    total,
+    totalPages,
+    limit: PRODUCTS_PER_PAGE,
     refetch: fetchRejectedProducts,
   };
 };

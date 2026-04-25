@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
   PRODUCT_SPONSORED: '/products/sponsored',
   PRODUCT_MY_PRODUCTS: '/products/seller/my-products',
   PRODUCT_UPDATE_STOCK: (id: string) => `/products/${id}/stock`,
+  PRODUCT_ADMIN_ALL: '/products/admin/all',
   PRODUCT_ADMIN_PENDING: '/products/admin/pending',
   PRODUCT_ADMIN_REJECTED: '/products/admin/rejected',
   PRODUCT_ADMIN_STATS: '/products/admin/stats',

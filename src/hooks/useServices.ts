@@ -3,27 +3,33 @@ import { serviceService } from '@/services/service.service';
 import { Service, ServiceStats } from '@/types/service.types';
 import { toast } from 'react-hot-toast';
 
-export const useServices = () => {
+const SERVICES_PER_PAGE = 20;
+
+export const useServices = (page: number = 1) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-const fetchServices = useCallback(async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    const response = await serviceService.getAllServices();
-    
-    // ✅ Extract the services array from response.data.services
-    setServices(response.data.services || []);
-  } catch (err: any) {
-    const errorMessage = err?.response?.data?.message || 'Failed to fetch services';
-    setError(errorMessage);
-    toast.error(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  const fetchServices = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await serviceService.getAllServices(page, SERVICES_PER_PAGE);
+      const data = response.data as any;
+      const servicesData = data.services || (Array.isArray(data) ? data : []);
+      setServices(servicesData);
+      setTotal(data.total ?? servicesData.length);
+      setTotalPages(data.totalPages ?? Math.ceil((data.total ?? servicesData.length) / SERVICES_PER_PAGE));
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || 'Failed to fetch services';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
 
   useEffect(() => {
     fetchServices();
@@ -133,6 +139,9 @@ const fetchServices = useCallback(async () => {
     services,
     loading,
     error,
+    total,
+    totalPages,
+    limit: SERVICES_PER_PAGE,
     deleteService,
     uploadImage,
     deleteImage,
@@ -181,27 +190,30 @@ export const useServiceStats = () => {
 
   return { stats, loading, error };
 };
-export const usePendingServices = () => {
+export const usePendingServices = (page: number = 1) => {
   const [pendingServices, setPendingServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchPendingServices = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await serviceService.getPendingServices();
-
-      // Extract the services array from response
-      const data = response.data || response;
-      setPendingServices(data.services || (Array.isArray(data) ? data : []));
+      const response = await serviceService.getPendingServices(page, SERVICES_PER_PAGE);
+      const data = (response.data || response) as any;
+      const servicesData = data.services || (Array.isArray(data) ? data : []);
+      setPendingServices(servicesData);
+      setTotal(data.total ?? servicesData.length);
+      setTotalPages(data.totalPages ?? Math.ceil((data.total ?? servicesData.length) / SERVICES_PER_PAGE));
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || 'Failed to fetch pending services';
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchPendingServices();
@@ -211,6 +223,9 @@ export const usePendingServices = () => {
     pendingServices,
     loading,
     error,
+    total,
+    totalPages,
+    limit: SERVICES_PER_PAGE,
     refetch: fetchPendingServices,
   };
 };

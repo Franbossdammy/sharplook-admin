@@ -6,13 +6,20 @@ import { ServiceCard } from '@/components/ui/ServiceCard';
 import { ServiceDetailsModal } from '@/components/ui/ServiceDetailsModal';
 import { Loading } from '@/components/ui/Loading';
 import { StatCard } from '@/components/ui/StatCard';
+import { Pagination } from '@/components/ui/Pagination';
 
 type FilterType = 'all' | 'approved' | 'pending' | 'rejected';
 
 export const ServicesPage: React.FC = () => {
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+
   const {
     services,
     loading,
+    total: allTotal,
+    totalPages: allTotalPages,
+    limit,
     deleteService,
     uploadImage,
     deleteImage,
@@ -20,21 +27,30 @@ export const ServicesPage: React.FC = () => {
     rejectService,
     searchServices,
     refetch,
-  } = useServices();
+  } = useServices(currentPage);
 
   const { stats, loading: statsLoading } = useServiceStats();
-  
-  // Add the pending services hook
-  const { 
-    pendingServices, 
-    loading: pendingLoading, 
-    refetch: refetchPending 
-  } = usePendingServices();
+
+  const {
+    pendingServices,
+    loading: pendingLoading,
+    total: pendingTotal,
+    totalPages: pendingTotalPages,
+    refetch: refetchPending,
+  } = usePendingServices(currentPage);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [filterType, setFilterType] = useState<FilterType>('all');
+
+  const handleFilterChange = (f: FilterType) => {
+    setFilterType(f);
+    setCurrentPage(1);
+  };
+
+  const activePagination = filterType === 'pending'
+    ? { total: pendingTotal, totalPages: pendingTotalPages }
+    : { total: allTotal, totalPages: allTotalPages };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -79,23 +95,15 @@ export const ServicesPage: React.FC = () => {
     refetch();
   };
 
-  // Filter services based on selected filter
-  // If filtering for pending and we have pendingServices data, use that instead
   const filteredServices = React.useMemo(() => {
-    if (filterType === 'pending' && pendingServices && pendingServices.length > 0) {
-      // Use the dedicated pending services data when viewing pending filter
-      return pendingServices;
-    }
-    
-    // Otherwise filter from the main services array
+    if (filterType === 'pending') return pendingServices;
     return services.filter((service) => {
       if (filterType === 'all') return true;
       return service.approvalStatus === filterType;
     });
   }, [services, filterType, pendingServices]);
 
-  // Safe check for pending services count
-  const pendingCount = pendingServices?.length || 0;
+  const pendingCount = pendingTotal || 0;
 
   if (loading && services.length === 0) {
     return <Loading size="lg" text="Loading services..." />;
@@ -158,7 +166,7 @@ export const ServicesPage: React.FC = () => {
                 You have {pendingCount} service{pendingCount !== 1 ? 's' : ''} waiting for approval.
               </p>
               <button
-                onClick={() => setFilterType('pending')}
+                onClick={() => handleFilterChange('pending')}
                 className="mt-2 text-sm font-medium text-yellow-900 hover:text-yellow-700 underline"
               >
                 View pending services
@@ -185,7 +193,7 @@ export const ServicesPage: React.FC = () => {
         {/* Filter Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => setFilterType('all')}
+            onClick={() => handleFilterChange('all')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               filterType === 'all'
                 ? 'bg-primary-600 text-white'
@@ -195,7 +203,7 @@ export const ServicesPage: React.FC = () => {
             All Services
           </button>
           <button
-            onClick={() => setFilterType('approved')}
+            onClick={() => handleFilterChange('approved')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               filterType === 'approved'
                 ? 'bg-green-600 text-white'
@@ -205,7 +213,7 @@ export const ServicesPage: React.FC = () => {
             Approved
           </button>
           <button
-            onClick={() => setFilterType('pending')}
+            onClick={() => handleFilterChange('pending')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors relative ${
               filterType === 'pending'
                 ? 'bg-yellow-600 text-white'
@@ -220,7 +228,7 @@ export const ServicesPage: React.FC = () => {
             )}
           </button>
           <button
-            onClick={() => setFilterType('rejected')}
+            onClick={() => handleFilterChange('rejected')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               filterType === 'rejected'
                 ? 'bg-red-600 text-white'
@@ -263,6 +271,17 @@ export const ServicesPage: React.FC = () => {
             />
           ))}
         </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !pendingLoading && filteredServices.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={activePagination.totalPages}
+          total={activePagination.total}
+          limit={limit}
+          onPageChange={setCurrentPage}
+        />
       )}
 
       {/* Service Details Modal */}

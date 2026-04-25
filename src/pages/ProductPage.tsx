@@ -25,13 +25,20 @@ import { EditProductModal } from '@/components/ui/EditProductModal';
 import { ConvertToServiceModal } from '@/components/ui/ConvertToServiceModal';
 import { Loading } from '@/components/ui/Loading';
 import { StatCard } from '@/components/ui/StatCard';
+import { Pagination } from '@/components/ui/Pagination';
 
 type FilterType = 'all' | 'approved' | 'pending' | 'rejected' | 'featured' | 'sponsored';
 
 export const ProductsPage: React.FC = () => {
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+
   const {
     products,
     loading,
+    total: allTotal,
+    totalPages: allTotalPages,
+    limit,
     deleteProduct,
     approveProduct,
     rejectProduct,
@@ -41,22 +48,25 @@ export const ProductsPage: React.FC = () => {
     updateProduct,
     convertToService,
     refetch,
-  } = useProducts();
+  } = useProducts(currentPage);
 
   const { stats, loading: statsLoading } = useProductStats();
-  
-  const { 
-    pendingProducts, 
-    loading: pendingLoading, 
-    refetch: refetchPending 
-  } = usePendingProducts();
 
-  // ✅ Add rejected products hook
-  const { 
-    rejectedProducts, 
-    loading: rejectedLoading, 
-    refetch: refetchRejected 
-  } = useRejectedProducts();
+  const {
+    pendingProducts,
+    loading: pendingLoading,
+    total: pendingTotal,
+    totalPages: pendingTotalPages,
+    refetch: refetchPending
+  } = usePendingProducts(currentPage);
+
+  const {
+    rejectedProducts,
+    loading: rejectedLoading,
+    total: rejectedTotal,
+    totalPages: rejectedTotalPages,
+    refetch: refetchRejected
+  } = useRejectedProducts(currentPage);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -69,7 +79,12 @@ export const ProductsPage: React.FC = () => {
   const [productToConvert, setProductToConvert] = useState<Product | null>(null);
   const [productToFeature, setProductToFeature] = useState<string | null>(null);
   const [productToSponsor, setProductToSponsor] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<FilterType>('all');
+
+  // Reset to page 1 whenever the filter changes
+  const handleFilterChange = (f: FilterType) => {
+    setFilterType(f);
+    setCurrentPage(1);
+  };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -161,27 +176,26 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
-  // ✅ Update filteredProducts to include rejected products
   const filteredProducts = React.useMemo(() => {
-    if (filterType === 'pending' && pendingProducts && pendingProducts.length > 0) {
-      return pendingProducts;
-    }
-    
-    // ✅ Add rejected products filter
-    if (filterType === 'rejected' && rejectedProducts && rejectedProducts.length > 0) {
-      return rejectedProducts;
-    }
-    
+    if (filterType === 'pending') return pendingProducts;
+    if (filterType === 'rejected') return rejectedProducts;
     return products.filter((product) => {
       if (filterType === 'all') return true;
       if (filterType === 'featured') return product.isFeatured;
       if (filterType === 'sponsored') return product.isSponsored;
       return product.approvalStatus === filterType;
     });
-  }, [products, filterType, pendingProducts, rejectedProducts]); // ✅ Add rejectedProducts to dependencies
+  }, [products, filterType, pendingProducts, rejectedProducts]);
 
-  const pendingCount = pendingProducts?.length || 0;
-  const rejectedCount = rejectedProducts?.length || 0; // ✅ Add rejected count
+  // Pagination info for the active filter
+  const activePagination = React.useMemo(() => {
+    if (filterType === 'pending') return { total: pendingTotal, totalPages: pendingTotalPages };
+    if (filterType === 'rejected') return { total: rejectedTotal, totalPages: rejectedTotalPages };
+    return { total: allTotal, totalPages: allTotalPages };
+  }, [filterType, pendingTotal, pendingTotalPages, rejectedTotal, rejectedTotalPages, allTotal, allTotalPages]);
+
+  const pendingCount = pendingTotal || 0;
+  const rejectedCount = rejectedTotal || 0;
 
   if (loading && products.length === 0) {
     return <Loading size="lg" text="Loading products..." />;
@@ -277,7 +291,7 @@ export const ProductsPage: React.FC = () => {
                 You have {pendingCount} product{pendingCount !== 1 ? 's' : ''} waiting for approval.
               </p>
               <button
-                onClick={() => setFilterType('pending')}
+                onClick={() => handleFilterChange('pending')}
                 className="mt-2 text-sm font-medium text-yellow-900 hover:text-yellow-700 underline"
               >
                 View pending products
@@ -300,7 +314,7 @@ export const ProductsPage: React.FC = () => {
                 You have {rejectedCount} rejected product{rejectedCount !== 1 ? 's' : ''}.
               </p>
               <button
-                onClick={() => setFilterType('rejected')}
+                onClick={() => handleFilterChange('rejected')}
                 className="mt-2 text-sm font-medium text-red-900 hover:text-red-700 underline"
               >
                 View rejected products
@@ -327,72 +341,59 @@ export const ProductsPage: React.FC = () => {
         {/* Filter Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => setFilterType('all')}
+            onClick={() => handleFilterChange('all')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              filterType === 'all'
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filterType === 'all' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             All Products
           </button>
           <button
-            onClick={() => setFilterType('approved')}
+            onClick={() => handleFilterChange('approved')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              filterType === 'approved'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filterType === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Approved
           </button>
           <button
-            onClick={() => setFilterType('pending')}
+            onClick={() => handleFilterChange('pending')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors relative ${
-              filterType === 'pending'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filterType === 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Pending Approval
             {!pendingLoading && pendingCount > 0 && (
               <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-yellow-800 bg-yellow-200 rounded-full">
-                {pendingCount}
+                {pendingCount > 99 ? '99+' : pendingCount}
               </span>
             )}
           </button>
           <button
-            onClick={() => setFilterType('rejected')}
+            onClick={() => handleFilterChange('rejected')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors relative ${
-              filterType === 'rejected'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filterType === 'rejected' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Rejected
-            {/* ✅ Add badge for rejected count */}
             {!rejectedLoading && rejectedCount > 0 && (
               <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-red-800 bg-red-200 rounded-full">
-                {rejectedCount}
+                {rejectedCount > 99 ? '99+' : rejectedCount}
               </span>
             )}
           </button>
           <button
-            onClick={() => setFilterType('featured')}
+            onClick={() => handleFilterChange('featured')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              filterType === 'featured'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filterType === 'featured' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Featured
           </button>
           <button
-            onClick={() => setFilterType('sponsored')}
+            onClick={() => handleFilterChange('sponsored')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              filterType === 'sponsored'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filterType === 'sponsored' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Sponsored
@@ -438,6 +439,17 @@ export const ProductsPage: React.FC = () => {
             />
           ))}
         </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !pendingLoading && !rejectedLoading && filteredProducts.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={activePagination.totalPages}
+          total={activePagination.total}
+          limit={limit}
+          onPageChange={setCurrentPage}
+        />
       )}
 
       {/* Product Details Modal */}
