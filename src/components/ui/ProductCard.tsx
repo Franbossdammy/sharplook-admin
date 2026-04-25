@@ -14,6 +14,7 @@ import {
   BadgeCheck,
   Store,
   Pencil,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { Product } from '@/types/product.types';
 
@@ -26,6 +27,7 @@ interface ProductCardProps {
   onFeature?: (productId: string) => void;
   onSponsor?: (productId: string) => void;
   onEdit?: (product: Product) => void;
+  onConvert?: (product: Product) => void;
   showApprovalActions?: boolean;
 }
 
@@ -38,6 +40,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onFeature,
   onSponsor,
   onEdit,
+  onConvert,
   showApprovalActions = false,
 }) => {
   const [showRejectModal, setShowRejectModal] = React.useState(false);
@@ -330,6 +333,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     title="Edit Product"
                   >
                     <Pencil className="w-4 h-4" />
+                  </button>
+                )}
+                {onConvert && product.sellerType !== 'admin' && (
+                  <button
+                    onClick={() => onConvert(product)}
+                    className="px-3 py-2 text-sm font-medium text-teal-600 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                    title="Convert to Service"
+                  >
+                    <ArrowRightLeft className="w-4 h-4" />
                   </button>
                 )}
                 {onFeature && product.approvalStatus === 'approved' && (

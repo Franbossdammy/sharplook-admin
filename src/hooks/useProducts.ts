@@ -150,6 +150,22 @@ export const useProducts = () => {
     }
   };
 
+  const convertToService = async (
+    productId: string,
+    data: { priceType: 'fixed' | 'hourly' | 'negotiable'; duration?: number }
+  ): Promise<boolean> => {
+    try {
+      await productService.convertToService(productId, data);
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      toast.success('Product converted to service successfully');
+      return true;
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || 'Failed to convert product to service';
+      toast.error(errorMessage);
+      return false;
+    }
+  };
+
   const updateProduct = async (productId: string, data: FormData): Promise<boolean> => {
     try {
       const response = await productService.updateProduct(productId, data);
@@ -196,6 +212,7 @@ export const useProducts = () => {
     sponsorProduct,
     searchProducts,
     updateProduct,
+    convertToService,
     updateStock,
     refetch: fetchProducts,
   };

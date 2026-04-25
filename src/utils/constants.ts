@@ -46,6 +46,7 @@ export const API_ENDPOINTS = {
   PRODUCT_REJECT: (id: string) => `/products/${id}/reject`,
   PRODUCT_FEATURE: (id: string) => `/products/${id}/feature`,
   PRODUCT_SPONSOR: (id: string) => `/products/${id}/sponsor`,
+  PRODUCT_CONVERT_TO_SERVICE: (id: string) => `/products/${id}/convert-to-service`,
   
   // Analytics
   DASHBOARD: '/analytics/dashboard',

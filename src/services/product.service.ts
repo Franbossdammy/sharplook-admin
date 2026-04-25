@@ -217,6 +217,16 @@ export class ProductService {
   }
 
 
+  async convertToService(
+    productId: string,
+    data: { priceType: 'fixed' | 'hourly' | 'negotiable'; duration?: number }
+  ): Promise<{ success: boolean; message: string; data: { service: any } }> {
+    return await apiService.post(
+      API_ENDPOINTS.PRODUCT_CONVERT_TO_SERVICE(productId),
+      data
+    );
+  }
+
   async getRejectedProducts(page: number = 1, limit: number = 20): Promise<ProductsResponse> {
   return await apiService.get<ProductsResponse>(
     `${API_ENDPOINTS.PRODUCT_ADMIN_REJECTED}?page=${page}&limit=${limit}`

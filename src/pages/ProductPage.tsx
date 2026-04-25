@@ -22,6 +22,7 @@ import { ProductDetailsModal } from '@/components/ui/ProductDetailsModal';
 import { FeatureProductModal } from '@/components/ui/FeatureProductModal';
 import { SponsorProductModal } from '@/components/ui/SponsorProductModal';
 import { EditProductModal } from '@/components/ui/EditProductModal';
+import { ConvertToServiceModal } from '@/components/ui/ConvertToServiceModal';
 import { Loading } from '@/components/ui/Loading';
 import { StatCard } from '@/components/ui/StatCard';
 
@@ -38,6 +39,7 @@ export const ProductsPage: React.FC = () => {
     sponsorProduct,
     searchProducts,
     updateProduct,
+    convertToService,
     refetch,
   } = useProducts();
 
@@ -63,6 +65,8 @@ export const ProductsPage: React.FC = () => {
   const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
+  const [productToConvert, setProductToConvert] = useState<Product | null>(null);
   const [productToFeature, setProductToFeature] = useState<string | null>(null);
   const [productToSponsor, setProductToSponsor] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -95,9 +99,21 @@ export const ProductsPage: React.FC = () => {
 
   const handleEditSubmit = async (productId: string, data: FormData): Promise<boolean> => {
     const success = await updateProduct(productId, data);
-    if (success) {
-      refetch();
-    }
+    if (success) refetch();
+    return success;
+  };
+
+  const handleConvertClick = (product: Product) => {
+    setProductToConvert(product);
+    setIsConvertModalOpen(true);
+  };
+
+  const handleConvertSubmit = async (
+    productId: string,
+    data: { priceType: 'fixed' | 'hourly' | 'negotiable'; duration?: number }
+  ): Promise<boolean> => {
+    const success = await convertToService(productId, data);
+    if (success) refetch();
     return success;
   };
 
@@ -417,6 +433,7 @@ export const ProductsPage: React.FC = () => {
               onFeature={handleFeatureClick}
               onSponsor={handleSponsorClick}
               onEdit={handleEditClick}
+              onConvert={handleConvertClick}
               showApprovalActions={product.approvalStatus === 'pending'}
             />
           ))}
@@ -461,6 +478,17 @@ export const ProductsPage: React.FC = () => {
         }}
         product={productToEdit}
         onSubmit={handleEditSubmit}
+      />
+
+      {/* Convert to Service Modal */}
+      <ConvertToServiceModal
+        isOpen={isConvertModalOpen}
+        onClose={() => {
+          setIsConvertModalOpen(false);
+          setProductToConvert(null);
+        }}
+        product={productToConvert}
+        onSubmit={handleConvertSubmit}
       />
     </div>
   );
