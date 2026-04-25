@@ -12,7 +12,9 @@
       "Bash(mkdir -p \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\\\\app\\\\verify-email\" && mkdir -p \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\\\\app\\\\reset-password\")",
       "Bash(cd \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\" && npm run build 2>&1)",
       "Bash(ls \"C:\\\\Users\\\\YungFlash\\\\Downloads\\\\sharplook-website\"/.env* 2>/dev/null || echo \"no env files\")",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(grep -v \"//\\\\|typeof\\\\|=\\\\|categoryName\\\\|approvalStatus\\\\|filterType\\\\|category =\\\\|category?\\\\|category &&\\\\|'category'\\\\|\\\\\"category\\\\\"\\\\|\\\\`category\\\\`\")",
+      "Bash(grep -v \"typeof\\\\|categoryName\\\\|\\\\.name\\\\|'category'\\\\|\\\\\"category\\\\\"\\\\|filter\\\\|=\\\\s*\\\\|category?\\\\|// \\\\|&&\\\\s*$\\\\|statusCategory\\\\|CategoryFilter\\\\|handleCategory\\\\|setCategory\\\\|category\\\\.icon\\\\|category\\\\.id\\\\|category\\\\._id\\\\|category as\")"
     ]
   }
 }
