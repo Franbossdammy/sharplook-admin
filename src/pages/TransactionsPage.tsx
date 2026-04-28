@@ -150,6 +150,7 @@ export const TransactionsPage: React.FC = () => {
 
   const getTransactionTypeLabel = (type: TransactionType) => {
     if (type === TransactionType.WALLET_CREDIT) return 'Manual Credit (Debt)';
+    if (type === TransactionType.DEPOSIT) return 'Wallet Top-Up';
     return type
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -165,10 +166,12 @@ export const TransactionsPage: React.FC = () => {
       TransactionType.BOOKING_EARNING,
       TransactionType.ORDER_EARNING,
       TransactionType.PAYMENT_RECEIVED,
+      TransactionType.DEPOSIT,
       TransactionType.REFUND,
       TransactionType.BOOKING_REFUND,
       TransactionType.ORDER_REFUND,
       TransactionType.ESCROW_RELEASE,
+      TransactionType.REFERRAL_BONUS,
     ];
     if (incomeTypes.includes(type)) {
       return 'bg-green-100 text-green-700';
@@ -184,10 +187,12 @@ export const TransactionsPage: React.FC = () => {
       TransactionType.BOOKING_EARNING,
       TransactionType.ORDER_EARNING,
       TransactionType.PAYMENT_RECEIVED,
+      TransactionType.DEPOSIT,
       TransactionType.REFUND,
       TransactionType.BOOKING_REFUND,
       TransactionType.ORDER_REFUND,
       TransactionType.ESCROW_RELEASE,
+      TransactionType.REFERRAL_BONUS,
     ];
     if (incomeTypes.includes(type)) {
       return <ArrowUpRight className="w-4 h-4" />;
@@ -359,7 +364,8 @@ export const TransactionsPage: React.FC = () => {
                   <option value={TransactionType.ORDER_EARNING}>Order Earning</option>
                   <option value={TransactionType.BOOKING_PAYMENT}>Booking Payment</option>
                   <option value={TransactionType.ORDER_PAYMENT}>Order Payment</option>
-                  <option value={TransactionType.WALLET_CREDIT}>Manual Credit (Debt)</option>
+                  <option value={TransactionType.DEPOSIT}>Wallet Top-Up (User Funded)</option>
+                  <option value={TransactionType.WALLET_CREDIT}>Manual Credit (Admin Debt)</option>
                   <option value={TransactionType.WALLET_DEBIT}>Wallet Debit</option>
                   <option value={TransactionType.WITHDRAWAL}>Withdrawal</option>
                   <option value={TransactionType.REFUND}>Refund</option>

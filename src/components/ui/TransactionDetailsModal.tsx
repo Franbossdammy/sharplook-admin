@@ -32,6 +32,7 @@ function getClassification(type: TransactionType): Classification {
     TransactionType.BOOKING_EARNING,
     TransactionType.ORDER_EARNING,
     TransactionType.PAYMENT_RECEIVED,
+    TransactionType.DEPOSIT,
     TransactionType.REFUND,
     TransactionType.BOOKING_REFUND,
     TransactionType.ORDER_REFUND,
@@ -157,12 +158,16 @@ function getMoneyFlow(transaction: Transaction): MoneyFlow {
         to: userName + ' (Wallet)',
         what: 'Referral reward bonus credited to wallet',
       };
-    case TransactionType.DEPOSIT:
+    case TransactionType.DEPOSIT: {
+      const method = transaction.metadata?.paymentMethod || 'card';
+      const ref = transaction.metadata?.paystackReference;
       return {
-        from: 'External / Card',
+        from: `User (${method.charAt(0).toUpperCase() + method.slice(1)} / Paystack)`,
         to: userName + ' (Wallet)',
-        what: 'Wallet top-up / deposit',
+        what: `User funded their own wallet via ${method}`,
+        note: ref ? `Paystack reference: ${ref}` : undefined,
       };
+    }
     default:
       return {
         from: 'Source',
@@ -196,6 +201,7 @@ export const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = (
 
   const getTransactionTypeLabel = (type: TransactionType) => {
     if (type === TransactionType.WALLET_CREDIT) return 'Manual Credit (Platform Debt)';
+    if (type === TransactionType.DEPOSIT) return 'Wallet Top-Up (User Funded)';
     return type
       .split('_')
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
