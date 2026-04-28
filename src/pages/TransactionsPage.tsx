@@ -10,6 +10,7 @@ import {
   ArrowDownLeft,
   ChevronDown,
   X,
+  AlertCircle,
 } from 'lucide-react';
 import { transactionService } from '../services/transaction.service';
 import {
@@ -56,6 +57,7 @@ export const TransactionsPage: React.FC = () => {
     totalRefunds: 0,
     bookingEarnings: 0,
     orderEarnings: 0,
+    totalCreditsIssued: 0,
     netRevenue: 0,
     byType: {},
   });
@@ -147,6 +149,7 @@ export const TransactionsPage: React.FC = () => {
   const formatCurrency = (amount: number) => `₦${amount.toLocaleString()}`;
 
   const getTransactionTypeLabel = (type: TransactionType) => {
+    if (type === TransactionType.WALLET_CREDIT) return 'Manual Credit (Debt)';
     return type
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -154,14 +157,19 @@ export const TransactionsPage: React.FC = () => {
   };
 
   const getTransactionTypeColor = (type: TransactionType) => {
+    // Platform debt: admin credits given out — money owed, not earned
+    if (type === TransactionType.WALLET_CREDIT) {
+      return 'bg-orange-100 text-orange-700';
+    }
     const incomeTypes = [
       TransactionType.BOOKING_EARNING,
       TransactionType.ORDER_EARNING,
       TransactionType.PAYMENT_RECEIVED,
-      TransactionType.WALLET_CREDIT,
       TransactionType.REFUND,
+      TransactionType.BOOKING_REFUND,
+      TransactionType.ORDER_REFUND,
+      TransactionType.ESCROW_RELEASE,
     ];
-
     if (incomeTypes.includes(type)) {
       return 'bg-green-100 text-green-700';
     }
@@ -169,14 +177,18 @@ export const TransactionsPage: React.FC = () => {
   };
 
   const getTransactionIcon = (type: TransactionType) => {
+    if (type === TransactionType.WALLET_CREDIT) {
+      return <AlertCircle className="w-4 h-4" />;
+    }
     const incomeTypes = [
       TransactionType.BOOKING_EARNING,
       TransactionType.ORDER_EARNING,
       TransactionType.PAYMENT_RECEIVED,
-      TransactionType.WALLET_CREDIT,
       TransactionType.REFUND,
+      TransactionType.BOOKING_REFUND,
+      TransactionType.ORDER_REFUND,
+      TransactionType.ESCROW_RELEASE,
     ];
-
     if (incomeTypes.includes(type)) {
       return <ArrowUpRight className="w-4 h-4" />;
     }
@@ -213,7 +225,7 @@ export const TransactionsPage: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="flex items-center gap-2 mb-1">
             <DollarSign className="w-4 h-4 text-gray-600" />
@@ -229,6 +241,7 @@ export const TransactionsPage: React.FC = () => {
             <p className="text-xs font-medium text-gray-600">Total Income</p>
           </div>
           <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalIncome)}</p>
+          <p className="text-xs text-gray-500 mt-1">Earned (bookings + orders)</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
@@ -237,6 +250,18 @@ export const TransactionsPage: React.FC = () => {
             <p className="text-xs font-medium text-gray-600">Total Expense</p>
           </div>
           <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalExpense)}</p>
+          <p className="text-xs text-gray-500 mt-1">Withdrawals + deductions</p>
+        </div>
+
+        <div className="bg-orange-50 rounded-xl shadow-sm border border-orange-200 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <AlertCircle className="w-4 h-4 text-orange-600" />
+            <p className="text-xs font-medium text-orange-700">Credits Issued</p>
+          </div>
+          <p className="text-2xl font-bold text-orange-600">
+            {formatCurrency(stats.totalCreditsIssued || 0)}
+          </p>
+          <p className="text-xs text-orange-500 mt-1">Platform debt (given to users)</p>
         </div>
 
         <div className="bg-gradient-to-br from-primary-50 to-pink-50 rounded-xl shadow-sm border border-primary-200 p-4">
@@ -244,7 +269,10 @@ export const TransactionsPage: React.FC = () => {
             <DollarSign className="w-4 h-4 text-primary-600" />
             <p className="text-xs font-medium text-primary-700">Net Revenue</p>
           </div>
-          <p className="text-2xl font-bold text-primary-900">{formatCurrency(stats.netRevenue)}</p>
+          <p className={`text-2xl font-bold ${stats.netRevenue >= 0 ? 'text-primary-900' : 'text-red-600'}`}>
+            {formatCurrency(stats.netRevenue)}
+          </p>
+          <p className="text-xs text-primary-500 mt-1">Income − Expense − Credits</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
@@ -255,6 +283,7 @@ export const TransactionsPage: React.FC = () => {
           <p className="text-2xl font-bold text-purple-600">
             {formatCurrency(stats.totalCommissions)}
           </p>
+          <p className="text-xs text-gray-500 mt-1">Platform cut earned</p>
         </div>
       </div>
 
@@ -328,9 +357,17 @@ export const TransactionsPage: React.FC = () => {
                   <option value="">All Types</option>
                   <option value={TransactionType.BOOKING_EARNING}>Booking Earning</option>
                   <option value={TransactionType.ORDER_EARNING}>Order Earning</option>
+                  <option value={TransactionType.BOOKING_PAYMENT}>Booking Payment</option>
+                  <option value={TransactionType.ORDER_PAYMENT}>Order Payment</option>
+                  <option value={TransactionType.WALLET_CREDIT}>Manual Credit (Debt)</option>
+                  <option value={TransactionType.WALLET_DEBIT}>Wallet Debit</option>
                   <option value={TransactionType.WITHDRAWAL}>Withdrawal</option>
                   <option value={TransactionType.REFUND}>Refund</option>
+                  <option value={TransactionType.BOOKING_REFUND}>Booking Refund</option>
+                  <option value={TransactionType.ORDER_REFUND}>Order Refund</option>
                   <option value={TransactionType.COMMISSION_DEDUCTION}>Commission</option>
+                  <option value={TransactionType.ESCROW_LOCK}>Escrow Lock</option>
+                  <option value={TransactionType.ESCROW_RELEASE}>Escrow Release</option>
                 </select>
               </div>
 
