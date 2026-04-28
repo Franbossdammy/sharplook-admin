@@ -122,6 +122,10 @@ export class UserService {
     return apiService.post<{ user: User }>(`${API_ENDPOINTS.USER_BY_ID(id)}/verify-vendor`);
   }
 
+  async unlockAccount(id: string): Promise<{ user: User }> {
+    return apiService.post<{ user: User }>(`${API_ENDPOINTS.USER_BY_ID(id)}/unlock`);
+  }
+
   async createAdmin(data: {
     firstName: string;
     lastName: string;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getImageUrl } from '@/utils/image';
-import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download } from 'lucide-react';
+import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download, LockOpen, Lock } from 'lucide-react';
 import { userService, GetUsersParams } from '@/services/user.service';
 import { analyticsService } from '@/services/analytics.service';
 import { Card } from '@/components/ui/Card';
@@ -34,6 +34,10 @@ export const UsersPage: React.FC = () => {
     user: null,
   });
   const [verifyModal, setVerifyModal] = useState<{ show: boolean; user: User | null }>({
+    show: false,
+    user: null,
+  });
+  const [unlockModal, setUnlockModal] = useState<{ show: boolean; user: User | null }>({
     show: false,
     user: null,
   });
@@ -118,6 +122,24 @@ export const UsersPage: React.FC = () => {
       fetchUsers();
     } catch (error: any) {
       showToast('Failed to delete user: ' + (error.message || 'Unknown error'), 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const isAccountLocked = (user: User) =>
+    !!(user.lockUntil && new Date(user.lockUntil) > new Date());
+
+  const confirmUnlock = async () => {
+    if (!unlockModal.user) return;
+    try {
+      setActionLoading(true);
+      await userService.unlockAccount(unlockModal.user._id);
+      showToast(`Account unlocked for ${unlockModal.user.firstName} ${unlockModal.user.lastName}`, 'success');
+      setUnlockModal({ show: false, user: null });
+      fetchUsers();
+    } catch (error: any) {
+      showToast('Failed to unlock account: ' + (error.message || 'Unknown error'), 'error');
     } finally {
       setActionLoading(false);
     }
@@ -417,23 +439,9 @@ export const UsersPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        {isAnalyticsAdmin ? (
-                          <span className={`text-xs font-medium rounded-lg px-2 py-1 capitalize ${
-                            user.status === 'active'
-                              ? 'bg-green-100 text-green-800'
-                              : user.status === 'suspended'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : user.status === 'pending_verification'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {user.status}
-                          </span>
-                        ) : (
-                          <select
-                            value={user.status}
-                            onChange={(e) => handleUpdateStatus(user._id, e.target.value)}
-                            className={`text-xs font-medium rounded-lg px-2 py-1 border-0 focus:ring-2 focus:ring-primary-500 capitalize ${
+                        <div className="flex flex-col gap-1">
+                          {isAnalyticsAdmin ? (
+                            <span className={`text-xs font-medium rounded-lg px-2 py-1 capitalize ${
                               user.status === 'active'
                                 ? 'bg-green-100 text-green-800'
                                 : user.status === 'suspended'
@@ -441,14 +449,36 @@ export const UsersPage: React.FC = () => {
                                 : user.status === 'pending_verification'
                                 ? 'bg-blue-100 text-blue-800'
                                 : 'bg-red-100 text-red-800'
-                            }`}
-                          >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="pending_verification">Pending</option>
-                          </select>
-                        )}
+                            }`}>
+                              {user.status}
+                            </span>
+                          ) : (
+                            <select
+                              value={user.status}
+                              onChange={(e) => handleUpdateStatus(user._id, e.target.value)}
+                              className={`text-xs font-medium rounded-lg px-2 py-1 border-0 focus:ring-2 focus:ring-primary-500 capitalize ${
+                                user.status === 'active'
+                                  ? 'bg-green-100 text-green-800'
+                                  : user.status === 'suspended'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : user.status === 'pending_verification'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              <option value="active">Active</option>
+                              <option value="inactive">Inactive</option>
+                              <option value="suspended">Suspended</option>
+                              <option value="pending_verification">Pending</option>
+                            </select>
+                          )}
+                          {isAccountLocked(user) && (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 bg-red-100 text-red-700 rounded-full w-fit">
+                              <Lock className="w-3 h-3" />
+                              Account Locked
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
                         {new Date(user.createdAt).toLocaleDateString()}
@@ -462,6 +492,15 @@ export const UsersPage: React.FC = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+                          {!isAnalyticsAdmin && isAccountLocked(user) && (
+                            <button
+                              onClick={() => setUnlockModal({ show: true, user })}
+                              className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              title="Unlock Account"
+                            >
+                              <LockOpen className="w-4 h-4" />
+                            </button>
+                          )}
                           {!isAnalyticsAdmin && user.isVendor && !user.vendorProfile?.isVerified && (
                             <button
                               onClick={() => setVerifyModal({ show: true, user })}
@@ -578,6 +617,19 @@ export const UsersPage: React.FC = () => {
         title="Verify Vendor"
         message={`Are you sure you want to verify ${verifyModal.user?.firstName} ${verifyModal.user?.lastName} as a vendor? This will grant them vendor privileges and their business will be marked as verified.`}
         confirmText="Verify Vendor"
+        cancelText="Cancel"
+        variant="success"
+        loading={actionLoading}
+      />
+
+      {/* Unlock Account Modal */}
+      <ConfirmModal
+        isOpen={unlockModal.show}
+        onClose={() => setUnlockModal({ show: false, user: null })}
+        onConfirm={confirmUnlock}
+        title="Unlock Account"
+        message={`Unlock the account for ${unlockModal.user?.firstName} ${unlockModal.user?.lastName}? Their login attempts will be reset and they can log in immediately.`}
+        confirmText="Unlock Account"
         cancelText="Cancel"
         variant="success"
         loading={actionLoading}

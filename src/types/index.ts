@@ -20,6 +20,7 @@ export interface User {
   lastSeen?: string;
   lastLogin?: string;
   loginAttempts?: number;
+  lockUntil?: string;
   walletBalance?: number;
   referralCode?: string;
   referredBy?: string | { _id: string };
