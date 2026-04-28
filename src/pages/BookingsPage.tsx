@@ -376,7 +376,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ booking, isOp
                     </p>
                     <Row label="Offer ID"    value={typeof booking.offer === 'object' ? booking.offer._id?.slice(-8).toUpperCase() : String(booking.offer).slice(-8).toUpperCase()} />
                     {typeof booking.offer === 'object' && booking.offer.title && <Row label="Title" value={booking.offer.title} />}
-                    {typeof booking.offer === 'object' && booking.offer.price && <Row label="Offer Price" value={fmtCurrency(booking.offer.price)} />}
+                    {typeof booking.offer === 'object' && booking.offer.proposedPrice != null && <Row label="Offer Price" value={fmtCurrency(booking.offer.proposedPrice)} />}
                   </div>
                 )}
               </div>

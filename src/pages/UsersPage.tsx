@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getImageUrl } from '@/utils/image';
-import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download, LockOpen, Lock } from 'lucide-react';
+import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download, KeyRound, Lock } from 'lucide-react';
 import { userService, GetUsersParams } from '@/services/user.service';
 import { analyticsService } from '@/services/analytics.service';
 import { Card } from '@/components/ui/Card';
@@ -498,7 +498,7 @@ export const UsersPage: React.FC = () => {
                               className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                               title="Unlock Account"
                             >
-                              <LockOpen className="w-4 h-4" />
+                              <KeyRound className="w-4 h-4" />
                             </button>
                           )}
                           {!isAnalyticsAdmin && user.isVendor && !user.vendorProfile?.isVerified && (
