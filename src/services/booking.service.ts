@@ -10,6 +10,7 @@ export class BookingService {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (filters?.status) params.append('status', filters.status);
     if (filters?.paymentStatus) params.append('paymentStatus', filters.paymentStatus);
+    if (filters?.bookingType) params.append('bookingType', filters.bookingType);
     if (filters?.startDate) params.append('startDate', filters.startDate);
     if (filters?.endDate) params.append('endDate', filters.endDate);
 

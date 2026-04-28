@@ -183,6 +183,53 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ booking, isOp
                   </div>
                 </div>
 
+                {/* Offer Details (offer-based bookings only) */}
+                {booking.bookingType === 'offer_based' && booking.offer && (
+                  <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                    <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-3 flex items-center gap-1">
+                      <ArrowRightLeft className="w-3.5 h-3.5" /> Original Offer
+                    </p>
+                    <p className="font-semibold text-gray-900">{booking.offer.title || 'Untitled Offer'}</p>
+                    {booking.offer.description && (
+                      <p className="text-sm text-gray-600 mt-1">{booking.offer.description}</p>
+                    )}
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500">Proposed Price: </span>
+                        <span className="font-semibold text-indigo-700">
+                          {booking.offer.proposedPrice != null
+                            ? `₦${booking.offer.proposedPrice.toLocaleString()}`
+                            : '—'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Final Booking Total: </span>
+                        <span className="font-semibold text-primary-600">{fmtCurrency(booking.totalAmount)}</span>
+                      </div>
+                      {booking.offer.status && (
+                        <div>
+                          <span className="text-gray-500">Offer Status: </span>
+                          <span className="font-medium capitalize">{booking.offer.status}</span>
+                        </div>
+                      )}
+                      {booking.offer.createdAt && (
+                        <div>
+                          <span className="text-gray-500">Offer Created: </span>
+                          <span>{fmt(booking.offer.createdAt)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Offer-based but offer not populated */}
+                {booking.bookingType === 'offer_based' && !booking.offer && (
+                  <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center gap-2">
+                    <ArrowRightLeft className="w-4 h-4 text-indigo-500" />
+                    <p className="text-sm text-indigo-700">This booking was created from a client offer (offer details not available).</p>
+                  </div>
+                )}
+
                 {/* Client & Vendor */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Client */}
@@ -647,6 +694,7 @@ export const BookingsPage: React.FC = () => {
     setFilters({
       status: undefined,
       paymentStatus: undefined,
+      bookingType: undefined,
       startDate: '',
       endDate: '',
     });
@@ -829,7 +877,20 @@ export const BookingsPage: React.FC = () => {
         {/* Filter Options */}
         {showFilters && (
           <div className="border-t border-gray-200 pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Booking Type</label>
+                <select
+                  value={filters.bookingType || ''}
+                  onChange={(e) => handleFilterChange('bookingType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  <option value="">All Types</option>
+                  <option value="standard">Standard</option>
+                  <option value="offer_based">Offer-Based</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
@@ -935,15 +996,19 @@ export const BookingsPage: React.FC = () => {
                   </div>
                   <div className="col-span-2">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      {booking.service?.name || 'N/A'}
+                      {booking.service?.name || (booking.bookingType === 'offer_based' ? booking.offer?.title || 'Offer Booking' : 'N/A')}
                     </p>
-                    {booking.service?.category && (
+                    {booking.bookingType === 'offer_based' ? (
+                      <span className="text-xs px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded font-medium">
+                        Offer-Based
+                      </span>
+                    ) : booking.service?.category ? (
                       <p className="text-xs text-gray-600 truncate">
                         {typeof booking.service.category === 'object'
                           ? booking.service.category.name
                           : booking.service.category}
                       </p>
-                    )}
+                    ) : null}
                   </div>
                   <div className="col-span-2">
                     <p className="text-sm font-medium text-gray-900">

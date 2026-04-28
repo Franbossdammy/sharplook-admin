@@ -38,8 +38,11 @@ export interface Booking {
   offer?: {
     _id: string;
     title?: string;
-    price?: number;
+    proposedPrice?: number;
     description?: string;
+    status?: string;
+    expiresAt?: string;
+    createdAt?: string;
   };
 
   // Schedule
@@ -111,6 +114,7 @@ export interface Booking {
 export interface BookingFilters {
   status?: string;
   paymentStatus?: string;
+  bookingType?: 'standard' | 'offer_based';
   startDate?: string;
   endDate?: string;
 }
