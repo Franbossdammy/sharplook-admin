@@ -239,6 +239,7 @@ class RedFlagService {
       harassment_reported: 'Harassment reported',
       inappropriate_behavior: 'Inappropriate behavior reported',
       safety_concern: 'Safety concern raised',
+      repeat_client_dropout: 'Vendor–client pair had repeat bookings then went silent — possible off-platform revenue leak',
       custom: 'Custom flag',
     };
 

@@ -19,6 +19,7 @@ export type RedFlagType =
   | 'harassment_reported'
   | 'inappropriate_behavior'
   | 'safety_concern'
+  | 'repeat_client_dropout'
   | 'custom';
 
 export type RedFlagSeverity = 'low' | 'medium' | 'high' | 'critical';

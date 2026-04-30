@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
-import { useServices, useServiceStats, usePendingServices } from '@/hooks/useServices';
+import { useServices, useServiceStats } from '@/hooks/useServices';
 import { Service } from '@/types/service.types';
 import { ServiceCard } from '@/components/ui/ServiceCard';
 import { ServiceDetailsModal } from '@/components/ui/ServiceDetailsModal';
@@ -13,33 +13,27 @@ type FilterType = 'all' | 'approved' | 'pending' | 'rejected';
 export const ServicesPage: React.FC = () => {
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Pass filter and search directly to the hook — server-side filtering via admin endpoint
+  const approvalFilter = filterType === 'all' ? undefined : filterType as 'pending' | 'approved' | 'rejected';
 
   const {
     services,
     loading,
-    total: allTotal,
-    totalPages: allTotalPages,
+    total,
+    totalPages,
     limit,
     deleteService,
     uploadImage,
     deleteImage,
     approveService,
     rejectService,
-    searchServices,
     refetch,
-  } = useServices(currentPage);
+  } = useServices(currentPage, approvalFilter, searchQuery || undefined);
 
   const { stats, loading: statsLoading } = useServiceStats();
 
-  const {
-    pendingServices,
-    loading: pendingLoading,
-    total: pendingTotal,
-    totalPages: pendingTotalPages,
-    refetch: refetchPending,
-  } = usePendingServices(currentPage);
-
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -48,19 +42,10 @@ export const ServicesPage: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const activePagination = filterType === 'pending'
-    ? { total: pendingTotal, totalPages: pendingTotalPages }
-    : { total: allTotal, totalPages: allTotalPages };
-
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-
-    if (query.trim()) {
-      searchServices(query);
-    } else {
-      refetch();
-    }
+    const q = e.target.value;
+    setSearchQuery(q);
+    setCurrentPage(1);
   };
 
   const handleViewDetails = (service: Service) => {
@@ -76,13 +61,11 @@ export const ServicesPage: React.FC = () => {
   const handleApprove = async (serviceId: string) => {
     await approveService(serviceId);
     refetch();
-    refetchPending(); // Refresh pending services list
   };
 
   const handleReject = async (serviceId: string, reason: string) => {
     await rejectService(serviceId, reason);
     refetch();
-    refetchPending(); // Refresh pending services list
   };
 
   const handleUploadImage = async (serviceId: string, file: File) => {
@@ -95,15 +78,7 @@ export const ServicesPage: React.FC = () => {
     refetch();
   };
 
-  const filteredServices = React.useMemo(() => {
-    if (filterType === 'pending') return pendingServices;
-    return services.filter((service) => {
-      if (filterType === 'all') return true;
-      return service.approvalStatus === filterType;
-    });
-  }, [services, filterType, pendingServices]);
-
-  const pendingCount = pendingTotal || 0;
+  const pendingCount = stats?.pendingServices ?? 0;
 
   if (loading && services.length === 0) {
     return <Loading size="lg" text="Loading services..." />;
@@ -154,7 +129,7 @@ export const ServicesPage: React.FC = () => {
       )}
 
       {/* Pending Services Alert - New Section */}
-      {!pendingLoading && pendingCount > 0 && (
+      {!statsLoading && pendingCount > 0 && (
         <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
@@ -190,6 +165,7 @@ export const ServicesPage: React.FC = () => {
           />
         </div>
 
+
         {/* Filter Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
@@ -221,7 +197,7 @@ export const ServicesPage: React.FC = () => {
             }`}
           >
             Pending Approval
-            {!pendingLoading && pendingCount > 0 && (
+            {!statsLoading && pendingCount > 0 && (
               <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-yellow-800 bg-yellow-200 rounded-full">
                 {pendingCount}
               </span>
@@ -241,11 +217,11 @@ export const ServicesPage: React.FC = () => {
       </div>
 
       {/* Services Grid */}
-      {(loading || (filterType === 'pending' && pendingLoading)) ? (
+      {loading ? (
         <div className="flex justify-center py-12">
           <Loading size="md" text="Loading..." />
         </div>
-      ) : filteredServices.length === 0 ? (
+      ) : services.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="w-8 h-8 text-gray-400" />
@@ -259,7 +235,7 @@ export const ServicesPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices.map((service) => (
+          {services.map((service) => (
             <ServiceCard
               key={service._id || service.id}
               service={service}
@@ -274,11 +250,11 @@ export const ServicesPage: React.FC = () => {
       )}
 
       {/* Pagination */}
-      {!loading && !pendingLoading && filteredServices.length > 0 && (
+      {!loading && services.length > 0 && (
         <Pagination
           currentPage={currentPage}
-          totalPages={activePagination.totalPages}
-          total={activePagination.total}
+          totalPages={totalPages}
+          total={total}
           limit={limit}
           onPageChange={setCurrentPage}
         />

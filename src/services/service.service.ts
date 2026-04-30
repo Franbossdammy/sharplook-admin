@@ -61,6 +61,21 @@ export class ServiceService {
     );
   }
 
+  // Get all services for admin (all statuses, no public default filter)
+  async getAdminAllServices(
+    page: number = 1,
+    limit: number = 20,
+    approvalStatus?: 'pending' | 'approved' | 'rejected',
+    search?: string
+  ): Promise<ServicesResponse> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (approvalStatus) params.append('approvalStatus', approvalStatus);
+    if (search) params.append('search', search);
+    return await apiService.get<ServicesResponse>(
+      `${API_ENDPOINTS.SERVICES}/admin/all?${params.toString()}`
+    );
+  }
+
   // Get admin stats
   async getAdminStats(): Promise<ServiceStatsResponse> {
     return await apiService.get<ServiceStatsResponse>(`${API_ENDPOINTS.SERVICES}/admin/stats`);

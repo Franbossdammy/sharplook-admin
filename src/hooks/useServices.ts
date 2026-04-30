@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 
 const SERVICES_PER_PAGE = 20;
 
-export const useServices = (page: number = 1) => {
+export const useServices = (page: number = 1, approvalStatus?: 'pending' | 'approved' | 'rejected', search?: string) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +16,8 @@ export const useServices = (page: number = 1) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await serviceService.getAllServices(page, SERVICES_PER_PAGE);
+      // Use admin endpoint so all statuses (pending, rejected, approved) are visible
+      const response = await serviceService.getAdminAllServices(page, SERVICES_PER_PAGE, approvalStatus, search);
       const data = response.data as any;
       const servicesData = data.services || (Array.isArray(data) ? data : []);
       setServices(servicesData);
@@ -29,7 +30,7 @@ export const useServices = (page: number = 1) => {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, approvalStatus, search]);
 
   useEffect(() => {
     fetchServices();
@@ -121,19 +122,21 @@ export const useServices = (page: number = 1) => {
 
 
   const searchServices = async (query: string) => {
-  try {
-    setLoading(true);
-    const response = await serviceService.searchServices(query);
-    
-    // ✅ Extract the services array
-    setServices(response.data.services || []);
-  } catch (err: any) {
-    const errorMessage = err?.response?.data?.message || 'Failed to search services';
-    toast.error(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      // Use admin endpoint with search so all statuses are included
+      const response = await serviceService.getAdminAllServices(1, SERVICES_PER_PAGE, undefined, query);
+      const data = response.data as any;
+      setServices(data.services || []);
+      setTotal(data.total ?? 0);
+      setTotalPages(data.totalPages ?? 1);
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || 'Failed to search services';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     services,

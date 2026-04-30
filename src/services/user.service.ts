@@ -49,7 +49,7 @@ export interface GetVendorDetailsOptions {
 export class UserService {
   async getUsers(params: GetUsersParams = {}): Promise<PaginatedResponse<User>> {
     const { page = 1, limit = 20, role, status, isVendor, search } = params;
-    
+
     const queryParams = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),

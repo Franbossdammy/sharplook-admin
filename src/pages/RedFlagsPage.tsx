@@ -48,6 +48,7 @@ const getTypeIcon = (type: string) => {
   if (type.includes('chat') || type.includes('contact')) return <MessageSquare className="w-4 h-4" />;
   if (type.includes('payment')) return <DollarSign className="w-4 h-4" />;
   if (type.includes('review')) return <FileText className="w-4 h-4" />;
+  if (type.includes('dropout')) return <TrendingUp className="w-4 h-4" />;
   return <Flag className="w-4 h-4" />;
 };
 
@@ -348,6 +349,7 @@ export const RedFlagsPage: React.FC = () => {
                     <option value="location_proximity_no_booking">Location Proximity</option>
                     <option value="chat_contains_contact_info">Contact Info in Chat</option>
                     <option value="chat_suggests_outside_payment">Outside Payment Suggested</option>
+                    <option value="repeat_client_dropout">Repeat Client Dropout</option>
                   </select>
                 </div>
 
