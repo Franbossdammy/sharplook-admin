@@ -66,6 +66,16 @@ export class BookingService {
       totalRevenue: stats.totalRevenue || 0,
     };
   }
+
+  async getAdminBookingById(id: string): Promise<Booking> {
+    const response = await apiService.get<any>(`/bookings/admin/${id}`);
+    return response.data?.booking || response.data?.data || response.data;
+  }
+
+  async cancelBooking(bookingId: string, reason: string): Promise<Booking> {
+    const response = await apiService.post<any>(`/bookings/admin/${bookingId}/cancel`, { reason });
+    return response.data?.booking || response.data || response;
+  }
 }
 
 export const bookingService = new BookingService();

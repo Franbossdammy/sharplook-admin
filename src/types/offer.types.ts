@@ -59,8 +59,9 @@ export interface Offer {
   };
   title: string;
   description: string;
+  serviceType: 'home' | 'shop' | 'both';
   proposedPrice: number;
-  location: OfferLocation;
+  location?: OfferLocation;
   preferredDate?: string;
   preferredTime?: string;
   flexibility: FlexibilityType;

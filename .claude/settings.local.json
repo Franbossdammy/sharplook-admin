@@ -16,7 +16,8 @@
       "Bash(grep -v \"//\\\\|typeof\\\\|=\\\\|categoryName\\\\|approvalStatus\\\\|filterType\\\\|category =\\\\|category?\\\\|category &&\\\\|'category'\\\\|\\\\\"category\\\\\"\\\\|\\\\`category\\\\`\")",
       "Bash(grep -v \"typeof\\\\|categoryName\\\\|\\\\.name\\\\|'category'\\\\|\\\\\"category\\\\\"\\\\|filter\\\\|=\\\\s*\\\\|category?\\\\|// \\\\|&&\\\\s*$\\\\|statusCategory\\\\|CategoryFilter\\\\|handleCategory\\\\|setCategory\\\\|category\\\\.icon\\\\|category\\\\.id\\\\|category\\\\._id\\\\|category as\")",
       "Bash(grep -E \"error TS|warning|✓|success|Done|^$\")",
-      "Bash(:)"
+      "Bash(:)",
+      "Bash(npm run *)"
     ]
   }
 }

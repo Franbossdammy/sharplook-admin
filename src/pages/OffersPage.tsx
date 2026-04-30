@@ -13,6 +13,10 @@ import {
   MapPin,
   Calendar,
   AlertCircle,
+  Home,
+  Store,
+  Layers,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { offerService } from '../services/offer.service';
 import { Offer, OfferStatus, OfferFilters, OfferStats } from '../types/offer.types';
@@ -145,6 +149,19 @@ export const OffersPage: React.FC = () => {
 
   const showToast = (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
     setToast({ show: true, message, type });
+  };
+
+  const getServiceTypeBadge = (serviceType?: string) => {
+    switch (serviceType) {
+      case 'home':
+        return <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded font-medium"><Home className="w-2.5 h-2.5" /> Home</span>;
+      case 'shop':
+        return <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs bg-sky-100 text-sky-700 rounded font-medium"><Store className="w-2.5 h-2.5" /> Shop</span>;
+      case 'both':
+        return <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs bg-violet-100 text-violet-700 rounded font-medium"><Layers className="w-2.5 h-2.5" /> Both</span>;
+      default:
+        return null;
+    }
   };
 
   const getStatusColor = (status: OfferStatus) => {
@@ -390,18 +407,26 @@ export const OffersPage: React.FC = () => {
                       <p className="text-sm font-medium text-gray-900 line-clamp-1">
                         {offer.title}
                       </p>
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                      <p className="text-xs text-gray-600 mt-1 line-clamp-1">
                         {offer.description}
                       </p>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                      <div className="flex items-center flex-wrap gap-1.5 mt-1.5">
+                        {getServiceTypeBadge(offer.serviceType)}
+                        {offer.status === 'accepted' && offer.bookingId && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded font-medium">
+                            <ArrowRightLeft className="w-2.5 h-2.5" /> Booking
+                          </span>
+                        )}
+                        {isExpiringSoon(offer.expiresAt) && offer.status === 'open' && (
+                          <span className="px-1.5 py-0.5 text-xs bg-orange-100 text-orange-700 rounded">
+                            Expiring Soon
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
                         <Calendar className="w-3 h-3" />
                         {formatDate(offer.createdAt)}
                       </div>
-                      {isExpiringSoon(offer.expiresAt) && offer.status === 'open' && (
-                        <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-orange-100 text-orange-700 rounded">
-                          Expiring Soon
-                        </span>
-                      )}
                     </div>
 
                     <div className="col-span-2">
@@ -519,6 +544,11 @@ export const OffersPage: React.FC = () => {
             setShowDetailsModal(false);
             setSelectedOffer(null);
             fetchOffers();
+          }}
+          onBookingCancelled={() => {
+            showToast('Booking cancelled. Full refund issued to client.', 'success');
+            fetchOffers();
+            fetchStats();
           }}
         />
       )}

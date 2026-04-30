@@ -37,12 +37,34 @@ interface BookingDetailsModalProps {
   booking: Booking;
   isOpen: boolean;
   onClose: () => void;
+  onCancel: (bookingId: string, reason: string) => Promise<void>;
 }
 
 type ModalTab = 'overview' | 'schedule' | 'payment' | 'activity' | 'notes';
 
-const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ booking, isOpen, onClose }) => {
+const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ booking, isOpen, onClose, onCancel }) => {
   const [activeTab, setActiveTab] = useState<ModalTab>('overview');
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState('');
+
+  const isCancelable = ['pending', 'accepted', 'in_progress'].includes(booking.status);
+
+  const handleCancelConfirm = async () => {
+    if (cancelReason.trim().length < 10) {
+      setCancelError('Please provide a reason of at least 10 characters');
+      return;
+    }
+    setCancelLoading(true);
+    setCancelError('');
+    try {
+      await onCancel(booking._id, cancelReason.trim());
+    } catch (err: any) {
+      setCancelError(err?.response?.data?.message || err?.message || 'Failed to cancel booking');
+      setCancelLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -556,13 +578,64 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ booking, isOp
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Close
-            </button>
+          <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            {showCancelConfirm ? (
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-red-700 flex items-center gap-1">
+                  <AlertTriangle className="w-4 h-4" /> Confirm cancellation — client will receive a full refund
+                </p>
+                <textarea
+                  value={cancelReason}
+                  onChange={e => { setCancelReason(e.target.value); setCancelError(''); }}
+                  placeholder="Enter reason for cancellation (min 10 characters)..."
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                  disabled={cancelLoading}
+                />
+                {cancelError && (
+                  <p className="text-xs text-red-600">{cancelError}</p>
+                )}
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => { setShowCancelConfirm(false); setCancelReason(''); setCancelError(''); }}
+                    disabled={cancelLoading}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    Go Back
+                  </button>
+                  <button
+                    onClick={handleCancelConfirm}
+                    disabled={cancelLoading || cancelReason.trim().length < 10}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {cancelLoading ? (
+                      <><span className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" /> Cancelling...</>
+                    ) : (
+                      <><XCircle className="w-4 h-4" /> Confirm Cancel</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                {isCancelable ? (
+                  <button
+                    onClick={() => setShowCancelConfirm(true)}
+                    className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2"
+                  >
+                    <XCircle className="w-4 h-4" /> Cancel Booking
+                  </button>
+                ) : (
+                  <div />
+                )}
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -683,6 +756,13 @@ export const BookingsPage: React.FC = () => {
   const handleViewDetails = (booking: Booking) => {
     setSelectedBooking(booking);
     setShowDetailsModal(true);
+  };
+
+  const handleAdminCancelBooking = async (bookingId: string, reason: string) => {
+    await bookingService.cancelBooking(bookingId, reason);
+    setShowDetailsModal(false);
+    setSelectedBooking(null);
+    await Promise.all([fetchBookings(), fetchStats()]);
   };
 
   const handleFilterChange = (key: keyof BookingFilters, value: string) => {
@@ -1113,8 +1193,9 @@ export const BookingsPage: React.FC = () => {
           onClose={() => {
             setShowDetailsModal(false);
             setSelectedBooking(null);
-            fetchBookings(); // Refresh list
+            fetchBookings();
           }}
+          onCancel={handleAdminCancelBooking}
         />
       )}
     </div>
