@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '@/utils/image';
-import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download, KeyRound, Lock } from 'lucide-react';
+import { Search, Check, Eye, Trash2, RefreshCw, Filter, Download, KeyRound, Lock, Receipt } from 'lucide-react';
 import { userService, GetUsersParams } from '@/services/user.service';
 import { analyticsService } from '@/services/analytics.service';
 import { Card } from '@/components/ui/Card';
@@ -21,6 +22,7 @@ interface ToastState {
 
 export const UsersPage: React.FC = () => {
   const { user: currentAdmin } = useAuth();
+  const navigate = useNavigate();
   const isAnalyticsAdmin = currentAdmin?.role === 'analytics_admin';
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -491,6 +493,19 @@ export const UsersPage: React.FC = () => {
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/transactions?userId=${user._id}&userName=${encodeURIComponent(
+                                  `${user.firstName} ${user.lastName}`
+                                )}`
+                              )
+                            }
+                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            title="View Transactions"
+                          >
+                            <Receipt className="w-4 h-4" />
                           </button>
                           {!isAnalyticsAdmin && isAccountLocked(user) && (
                             <button

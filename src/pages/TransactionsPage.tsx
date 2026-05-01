@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   DollarSign,
   TrendingUp,
@@ -11,6 +12,7 @@ import {
   ChevronDown,
   X,
   AlertCircle,
+  User,
 } from 'lucide-react';
 import { transactionService } from '../services/transaction.service';
 import {
@@ -24,6 +26,8 @@ import { TransactionDetailsModal } from '../components/ui/TransactionDetailsModa
 import { Toast } from '../components/ui/Toast';
 
 export const TransactionsPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -37,14 +41,26 @@ export const TransactionsPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const limit = 20;
 
-  // Filters
+  // Filters — pre-seed userId from URL params on mount
+  const [filteredUserName, setFilteredUserName] = useState(searchParams.get('userName') || '');
   const [filters, setFilters] = useState<TransactionFilters>({
-    userId: '',
+    userId: searchParams.get('userId') || '',
     type: undefined,
     status: undefined,
     startDate: '',
     endDate: '',
   });
+
+  // Per-user summary stats (computed when userId filter is active)
+  const [userSummaryStats, setUserSummaryStats] = useState<{
+    totalPaid: number;
+    totalEarned: number;
+    totalRefunded: number;
+    totalWithdrawn: number;
+    totalDeposited: number;
+    transactionCount: number;
+    walletBalance: number;
+  } | null>(null);
 
   // Stats
   const [stats, setStats] = useState<TransactionStats>({
@@ -111,6 +127,66 @@ export const TransactionsPage: React.FC = () => {
     }
   };
 
+  const fetchUserSummaryStats = async (userId: string) => {
+    try {
+      const result = await transactionService.getAllTransactions({ userId }, 1, 1000);
+      const txns = result.transactions;
+
+      let totalPaid = 0, totalEarned = 0, totalRefunded = 0, totalWithdrawn = 0, totalDeposited = 0;
+
+      for (const txn of txns) {
+        if (txn.status !== PaymentStatus.COMPLETED && txn.status !== PaymentStatus.REFUNDED) continue;
+        switch (txn.type) {
+          case TransactionType.BOOKING_PAYMENT:
+          case TransactionType.ORDER_PAYMENT:
+            totalPaid += txn.amount;
+            break;
+          case TransactionType.BOOKING_EARNING:
+          case TransactionType.ORDER_EARNING:
+          case TransactionType.PAYMENT_RECEIVED:
+            totalEarned += txn.amount;
+            break;
+          case TransactionType.BOOKING_REFUND:
+          case TransactionType.ORDER_REFUND:
+          case TransactionType.REFUND:
+            totalRefunded += txn.amount;
+            break;
+          case TransactionType.WITHDRAWAL:
+            totalWithdrawn += txn.amount;
+            break;
+          case TransactionType.DEPOSIT:
+            totalDeposited += txn.amount;
+            break;
+        }
+      }
+
+      const sorted = [...txns].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      const walletBalance = sorted[0]?.balanceAfter ?? 0;
+
+      setUserSummaryStats({
+        totalPaid,
+        totalEarned,
+        totalRefunded,
+        totalWithdrawn,
+        totalDeposited,
+        transactionCount: result.total,
+        walletBalance,
+      });
+    } catch (error) {
+      console.error('Error fetching user summary stats:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (filters.userId) {
+      fetchUserSummaryStats(filters.userId);
+    } else {
+      setUserSummaryStats(null);
+    }
+  }, [filters.userId]);
+
   const handleViewDetails = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setShowDetailsModal(true);
@@ -121,7 +197,16 @@ export const TransactionsPage: React.FC = () => {
     setPage(1);
   };
 
+  const clearUserFilter = () => {
+    setFilteredUserName('');
+    setFilters((prev) => ({ ...prev, userId: '' }));
+    setUserSummaryStats(null);
+    setSearchParams({});
+    setPage(1);
+  };
+
   const clearFilters = () => {
+    setFilteredUserName('');
     setFilters({
       userId: '',
       type: undefined,
@@ -129,6 +214,8 @@ export const TransactionsPage: React.FC = () => {
       startDate: '',
       endDate: '',
     });
+    setUserSummaryStats(null);
+    setSearchParams({});
     setPage(1);
   };
 
@@ -225,9 +312,83 @@ export const TransactionsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
-          <p className="text-gray-600 mt-1">Monitor and manage all platform transactions</p>
+          <p className="text-gray-600 mt-1">
+            {filters.userId && filteredUserName
+              ? `Showing transactions for ${filteredUserName}`
+              : 'Monitor and manage all platform transactions'}
+          </p>
         </div>
       </div>
+
+      {/* Per-User Banner (shown when filtering by a specific user) */}
+      {filters.userId && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-indigo-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-indigo-900">
+                  {filteredUserName || 'User'}'s Transaction History
+                </p>
+                <p className="text-xs text-indigo-600">
+                  {userSummaryStats
+                    ? `${userSummaryStats.transactionCount} total transactions found`
+                    : 'Loading summary...'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={clearUserFilter}
+              className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-900 bg-white border border-indigo-200 rounded-lg px-3 py-1.5 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Clear user filter
+            </button>
+          </div>
+
+          {userSummaryStats && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="bg-white rounded-lg p-3 border border-red-100">
+                <p className="text-xs text-gray-500 mb-1">Total Spent (client)</p>
+                <p className="text-lg font-bold text-red-600">
+                  {formatCurrency(userSummaryStats.totalPaid)}
+                </p>
+                <p className="text-xs text-gray-400">bookings + orders paid</p>
+              </div>
+              <div className="bg-white rounded-lg p-3 border border-green-100">
+                <p className="text-xs text-gray-500 mb-1">Total Earned (vendor)</p>
+                <p className="text-lg font-bold text-green-600">
+                  {formatCurrency(userSummaryStats.totalEarned)}
+                </p>
+                <p className="text-xs text-gray-400">service earnings</p>
+              </div>
+              <div className="bg-white rounded-lg p-3 border border-blue-100">
+                <p className="text-xs text-gray-500 mb-1">Total Refunded</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {formatCurrency(userSummaryStats.totalRefunded)}
+                </p>
+                <p className="text-xs text-gray-400">returned to wallet</p>
+              </div>
+              <div className="bg-white rounded-lg p-3 border border-orange-100">
+                <p className="text-xs text-gray-500 mb-1">Total Withdrawn</p>
+                <p className="text-lg font-bold text-orange-600">
+                  {formatCurrency(userSummaryStats.totalWithdrawn)}
+                </p>
+                <p className="text-xs text-gray-400">cashed out</p>
+              </div>
+              <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                <p className="text-xs text-gray-500 mb-1">Wallet Balance (last)</p>
+                <p className="text-lg font-bold text-indigo-700">
+                  {formatCurrency(userSummaryStats.walletBalance)}
+                </p>
+                <p className="text-xs text-gray-400">after last transaction</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -351,7 +512,20 @@ export const TransactionsPage: React.FC = () => {
         {/* Filter Options */}
         {showFilters && (
           <div className="border-t border-gray-200 pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                <input
+                  type="text"
+                  placeholder="Paste user ID..."
+                  value={filters.userId || ''}
+                  onChange={(e) => {
+                    handleFilterChange('userId', e.target.value);
+                    if (!e.target.value) setFilteredUserName('');
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm font-mono"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                 <select
