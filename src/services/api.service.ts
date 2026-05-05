@@ -41,11 +41,17 @@ class ApiService {
             const refreshToken = Cookies.get(STORAGE_KEYS.REFRESH_TOKEN);
             if (refreshToken) {
               const response = await this.api.post('/auth/refresh-token', { refreshToken });
-              const token  = response.data.authToken;
-              
+              // Backend wraps response: { success, data: { accessToken, refreshToken } }
+              const newTokens = response.data?.data || response.data;
+              const token = newTokens?.accessToken;
+              const newRefreshToken = newTokens?.refreshToken;
+
+              if (!token) throw new Error('No access token in refresh response');
+
               Cookies.set(STORAGE_KEYS.AUTH_TOKEN, token);
+              if (newRefreshToken) Cookies.set(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
               originalRequest.headers.Authorization = `Bearer ${token}`;
-              
+
               return this.api(originalRequest);
             }
           } catch (refreshError) {
