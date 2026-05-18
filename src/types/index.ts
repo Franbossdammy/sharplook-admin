@@ -70,6 +70,9 @@ export interface User {
     isVerified?: boolean;
     verificationStatus?: string;
     verificationDate?: string;
+    kycStatus?: 'not_submitted' | 'pending' | 'approved' | 'rejected';
+    kycRejectionReason?: string;
+    kycEditAllowed?: boolean;
     businessPhone?: string;
     businessAddress?: string;
     redFlagCount?: number;

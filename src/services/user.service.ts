@@ -122,6 +122,18 @@ export class UserService {
     return apiService.post<{ user: User }>(`${API_ENDPOINTS.USER_BY_ID(id)}/verify-vendor`);
   }
 
+  async approveKyc(id: string): Promise<any> {
+    return apiService.post(`${API_ENDPOINTS.USER_BY_ID(id)}/approve-kyc`);
+  }
+
+  async rejectKyc(id: string, reason: string): Promise<any> {
+    return apiService.post(`${API_ENDPOINTS.USER_BY_ID(id)}/reject-kyc`, { reason });
+  }
+
+  async setKycEditAllowed(id: string, allowed: boolean): Promise<any> {
+    return apiService.post(`${API_ENDPOINTS.USER_BY_ID(id)}/kyc-edit-access`, { allowed });
+  }
+
   async unlockAccount(id: string): Promise<{ user: User }> {
     return apiService.post<{ user: User }>(`${API_ENDPOINTS.USER_BY_ID(id)}/unlock`);
   }

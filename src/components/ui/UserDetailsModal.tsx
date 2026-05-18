@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Mail, Phone, MapPin, Calendar, Clock, Star, CheckCircle, XCircle, Briefcase, Package, Wallet, Shield, User as UserIcon, FileText, Clock3 } from 'lucide-react';
+import { X, Mail, Phone, MapPin, Calendar, Clock, Star, CheckCircle, XCircle, Briefcase, Package, Wallet, Shield, User as UserIcon, FileText, Clock3, Lock, Unlock, AlertCircle } from 'lucide-react';
 import { User } from '@/types';
 import { userService } from '@/services/user.service';
 import { Loading } from '@/components/ui/Loading';
@@ -30,6 +30,9 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
   const [vendorDetails, setVendorDetails] = useState<VendorDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [kycActionLoading, setKycActionLoading] = useState(false);
+  const [showRejectInput, setShowRejectInput] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -71,6 +74,56 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
 
     fetchUserDetails();
   }, [user._id, user.isVendor]);
+
+  const handleApproveKyc = async () => {
+    if (!userDetails) return;
+    setKycActionLoading(true);
+    try {
+      await userService.approveKyc(userDetails._id);
+      setUserDetails(prev => prev ? {
+        ...prev,
+        vendorProfile: { ...prev.vendorProfile, kycStatus: 'approved', kycRejectionReason: undefined }
+      } : prev);
+    } catch (err: any) {
+      console.error('Failed to approve KYC:', err);
+    } finally {
+      setKycActionLoading(false);
+    }
+  };
+
+  const handleRejectKyc = async () => {
+    if (!userDetails || !rejectReason.trim()) return;
+    setKycActionLoading(true);
+    try {
+      await userService.rejectKyc(userDetails._id, rejectReason.trim());
+      setUserDetails(prev => prev ? {
+        ...prev,
+        vendorProfile: { ...prev.vendorProfile, kycStatus: 'rejected', kycRejectionReason: rejectReason.trim() }
+      } : prev);
+      setShowRejectInput(false);
+      setRejectReason('');
+    } catch (err: any) {
+      console.error('Failed to reject KYC:', err);
+    } finally {
+      setKycActionLoading(false);
+    }
+  };
+
+  const handleToggleKycEditAccess = async (allow: boolean) => {
+    if (!userDetails) return;
+    setKycActionLoading(true);
+    try {
+      await userService.setKycEditAllowed(userDetails._id, allow);
+      setUserDetails(prev => prev ? {
+        ...prev,
+        vendorProfile: { ...prev.vendorProfile, kycEditAllowed: allow }
+      } : prev);
+    } catch (err: any) {
+      console.error('Failed to update KYC edit access:', err);
+    } finally {
+      setKycActionLoading(false);
+    }
+  };
 
   const renderAvailabilitySchedule = (schedule: any) => {
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -535,6 +588,141 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                     </div>
                   )}
                 </Card>
+
+                {/* KYC Management */}
+                {userDetails.vendorProfile && (
+                  <Card>
+                    <h5 className="font-semibold text-gray-900 mb-4 flex items-center">
+                      <Shield className="w-5 h-5 mr-2 text-primary-600" />
+                      KYC Verification
+                    </h5>
+
+                    {/* KYC Status Badge */}
+                    <div className="flex items-center gap-3 mb-4">
+                      {(() => {
+                        const status = userDetails.vendorProfile?.kycStatus || 'not_submitted';
+                        const config = {
+                          approved: { bg: 'bg-green-100', text: 'text-green-800', icon: <CheckCircle className="w-4 h-4 mr-1.5" />, label: 'Approved' },
+                          pending: { bg: 'bg-amber-100', text: 'text-amber-800', icon: <Clock className="w-4 h-4 mr-1.5" />, label: 'Pending Review' },
+                          rejected: { bg: 'bg-red-100', text: 'text-red-800', icon: <XCircle className="w-4 h-4 mr-1.5" />, label: 'Rejected' },
+                          not_submitted: { bg: 'bg-gray-100', text: 'text-gray-600', icon: <AlertCircle className="w-4 h-4 mr-1.5" />, label: 'Not Submitted' },
+                        }[status] || { bg: 'bg-gray-100', text: 'text-gray-600', icon: <AlertCircle className="w-4 h-4 mr-1.5" />, label: 'Not Submitted' };
+                        return (
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${config.bg} ${config.text}`}>
+                            {config.icon}
+                            {config.label}
+                          </span>
+                        );
+                      })()}
+                      {userDetails.vendorProfile?.kycStatus === 'approved' && (
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${
+                          userDetails.vendorProfile?.kycEditAllowed
+                            ? 'bg-orange-100 text-orange-800'
+                            : 'bg-green-50 text-green-700'
+                        }`}>
+                          {userDetails.vendorProfile?.kycEditAllowed
+                            ? <><Unlock className="w-4 h-4 mr-1.5" /> Edit Access Granted</>
+                            : <><Lock className="w-4 h-4 mr-1.5" /> Documents Locked</>
+                          }
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Rejection Reason */}
+                    {userDetails.vendorProfile?.kycStatus === 'rejected' && userDetails.vendorProfile?.kycRejectionReason && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm font-medium text-red-700 mb-1">Rejection Reason</p>
+                        <p className="text-sm text-red-600">{userDetails.vendorProfile.kycRejectionReason}</p>
+                      </div>
+                    )}
+
+                    {/* KYC Action Buttons */}
+                    <div className="space-y-3">
+                      {/* Approve / Reject — shown when pending */}
+                      {userDetails.vendorProfile?.kycStatus === 'pending' && !showRejectInput && (
+                        <div className="flex gap-3">
+                          <button
+                            onClick={handleApproveKyc}
+                            disabled={kycActionLoading}
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            {kycActionLoading ? 'Processing…' : 'Approve KYC'}
+                          </button>
+                          <button
+                            onClick={() => setShowRejectInput(true)}
+                            disabled={kycActionLoading}
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            Reject KYC
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Reject reason input */}
+                      {showRejectInput && (
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">Rejection Reason</label>
+                          <textarea
+                            value={rejectReason}
+                            onChange={e => setRejectReason(e.target.value)}
+                            placeholder="Explain why the KYC documents are being rejected…"
+                            rows={3}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleRejectKyc}
+                              disabled={kycActionLoading || !rejectReason.trim()}
+                              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <XCircle className="w-4 h-4" />
+                              {kycActionLoading ? 'Processing…' : 'Confirm Rejection'}
+                            </button>
+                            <button
+                              onClick={() => { setShowRejectInput(false); setRejectReason(''); }}
+                              disabled={kycActionLoading}
+                              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Edit Access Toggle — shown when approved */}
+                      {userDetails.vendorProfile?.kycStatus === 'approved' && (
+                        <div>
+                          {userDetails.vendorProfile?.kycEditAllowed ? (
+                            <button
+                              onClick={() => handleToggleKycEditAccess(false)}
+                              disabled={kycActionLoading}
+                              className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 text-white text-sm font-medium rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Lock className="w-4 h-4" />
+                              {kycActionLoading ? 'Processing…' : 'Revoke Edit Access'}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleToggleKycEditAccess(true)}
+                              disabled={kycActionLoading}
+                              className="flex items-center gap-2 px-4 py-2.5 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Unlock className="w-4 h-4" />
+                              {kycActionLoading ? 'Processing…' : 'Allow Edit Access'}
+                            </button>
+                          )}
+                          <p className="text-xs text-gray-500 mt-2">
+                            {userDetails.vendorProfile?.kycEditAllowed
+                              ? 'Vendor can currently edit their KYC documents. Revoke this to lock them again.'
+                              : 'KYC documents are locked. Grant edit access if the vendor needs to update them.'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                )}
 
                 {/* Availability Schedule */}
                 {userDetails.vendorProfile?.availabilitySchedule && (
