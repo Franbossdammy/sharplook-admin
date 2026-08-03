@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { X, Mail, Phone, MapPin, Calendar, Clock, Star, CheckCircle, XCircle, Briefcase, Package, Wallet, Shield, User as UserIcon, FileText, Clock3, Lock, Unlock, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, Mail, Phone, MapPin, Calendar, Clock, Star, CheckCircle, XCircle, Briefcase, Package, Wallet, Shield, User as UserIcon, FileText, Clock3, Lock, Unlock, AlertCircle, Receipt, CreditCard, ExternalLink } from 'lucide-react';
 import { User } from '@/types';
 import { userService } from '@/services/user.service';
 import { Loading } from '@/components/ui/Loading';
@@ -26,6 +27,7 @@ interface VendorDetails {
 }
 
 export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClose }) => {
+  const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState<User | null>(null);
   const [vendorDetails, setVendorDetails] = useState<VendorDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -373,6 +375,46 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                     {userDetails.loginAttempts || 0}
                   </p>
                 </div>
+              </div>
+            </Card>
+
+            {/* Quick Navigation */}
+            <Card>
+              <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
+                <ExternalLink className="w-4 h-4 mr-2 text-primary-500" />
+                Quick Navigation
+              </h5>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    onClose();
+                    navigate(`/bookings?userId=${userDetails._id || userDetails.id}&userName=${encodeURIComponent(userDetails.fullName || `${userDetails.firstName} ${userDetails.lastName}`)}`);
+                  }}
+                  className="flex items-center space-x-2 p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-left"
+                >
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-800">Bookings</p>
+                    <p className="text-xs text-blue-500">View all bookings</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    onClose();
+                    navigate(`/transactions?userId=${userDetails._id || userDetails.id}&userName=${encodeURIComponent(userDetails.fullName || `${userDetails.firstName} ${userDetails.lastName}`)}`);
+                  }}
+                  className="flex items-center space-x-2 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors text-left"
+                >
+                  <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Receipt className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-indigo-800">Transactions</p>
+                    <p className="text-xs text-indigo-500">View all transactions</p>
+                  </div>
+                </button>
               </div>
             </Card>
 

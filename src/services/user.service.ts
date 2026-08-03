@@ -9,6 +9,14 @@ export interface GetUsersParams {
   status?: string;
   isVendor?: boolean;
   search?: string;
+  dateJoinedFrom?: string;
+  dateJoinedTo?: string;
+  lastLoginFrom?: string;
+  lastLoginTo?: string;
+  state?: string;
+  minWalletBalance?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface UserStats {
@@ -48,7 +56,22 @@ export interface GetVendorDetailsOptions {
 
 export class UserService {
   async getUsers(params: GetUsersParams = {}): Promise<PaginatedResponse<User>> {
-    const { page = 1, limit = 20, role, status, isVendor, search } = params;
+    const {
+      page = 1,
+      limit = 20,
+      role,
+      status,
+      isVendor,
+      search,
+      dateJoinedFrom,
+      dateJoinedTo,
+      lastLoginFrom,
+      lastLoginTo,
+      state,
+      minWalletBalance,
+      sortBy,
+      sortOrder,
+    } = params;
 
     const queryParams = new URLSearchParams({
       page: page.toString(),
@@ -59,15 +82,19 @@ export class UserService {
     if (status) queryParams.append('status', status);
     if (isVendor !== undefined) queryParams.append('isVendor', isVendor.toString());
     if (search) queryParams.append('search', search);
+    if (dateJoinedFrom) queryParams.append('dateJoinedFrom', dateJoinedFrom);
+    if (dateJoinedTo) queryParams.append('dateJoinedTo', dateJoinedTo);
+    if (lastLoginFrom) queryParams.append('lastLoginFrom', lastLoginFrom);
+    if (lastLoginTo) queryParams.append('lastLoginTo', lastLoginTo);
+    if (state) queryParams.append('state', state);
+    if (minWalletBalance !== undefined) queryParams.append('minWalletBalance', minWalletBalance.toString());
+    if (sortBy) queryParams.append('sortBy', sortBy);
+    if (sortOrder) queryParams.append('sortOrder', sortOrder);
 
     const response: any = await apiService.get(
       `${API_ENDPOINTS.USERS}?${queryParams.toString()}`
     );
 
-    console.log('Users API response:', response);
-
-    // Handle the response structure: 
-    // { success, message, data: [...users], meta: { pagination: {...} } }
     return {
       data: response.data || [],
       users: response.data || [],
@@ -86,7 +113,7 @@ export class UserService {
     options?: GetVendorDetailsOptions
   ): Promise<VendorFullDetails> {
     const queryParams = new URLSearchParams();
-    
+
     if (options?.includeServices !== undefined) {
       queryParams.append('includeServices', options.includeServices.toString());
     }
@@ -99,10 +126,8 @@ export class UserService {
 
     const queryString = queryParams.toString();
     const url = `${API_ENDPOINTS.VENDOR_DETAILS(vendorId)}${queryString ? `?${queryString}` : ''}`;
-    
+
     const response: any = await apiService.get(url);
-    
-    // Handle response structure: { success, message, data: { vendor, services, reviews, stats } }
     return response.data || response;
   }
 
