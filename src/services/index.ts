@@ -14,3 +14,5 @@ export { notificationService } from './notification.service';
 export { transactionService } from './transaction.service';
 export { withdrawalService } from './withdrawal.service';
 export { redFlagService } from './redFlag.service';
+export { promoService } from './promo.service';
+export type { PromoCampaign, PromoStats, CreatePromoDto, UpdatePromoDto } from './promo.service';

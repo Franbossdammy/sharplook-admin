@@ -121,6 +121,14 @@ export const API_ENDPOINTS = {
   BLOG_HIDE: (id: string) => `/blog/admin/${id}/hide`,
   BLOG_FEATURE: (id: string) => `/blog/admin/${id}/feature`,
   BLOG_TOGGLE_COMMENT: (postId: string, commentId: string) => `/blog/admin/${postId}/comment/${commentId}/toggle`,
+
+  // Promo Campaigns (admin)
+  PROMO_CURRENT: '/promo/current',
+  PROMO_ADMIN_LIST: '/promo/admin',
+  PROMO_ADMIN_CREATE: '/promo/admin',
+  PROMO_ADMIN_UPDATE: (id: string) => `/promo/admin/${id}`,
+  PROMO_ADMIN_PAUSE: (id: string) => `/promo/admin/${id}/pause`,
+  PROMO_ADMIN_STATS: (id: string) => `/promo/admin/${id}/stats`,
 } as const;
 
 // Storage Keys
@@ -156,6 +164,7 @@ export const ROUTES = {
   WALLET_TOPUP: '/wallet-topup',
   BLOG: '/blog',
   APP_SETTINGS: '/app-settings',
+  PROMO: '/promo',
 } as const;
 
 // Pagination

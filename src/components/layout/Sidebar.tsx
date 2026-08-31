@@ -93,6 +93,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: 'notifications', label: 'Notifications', icon: Bell, path: ROUTES.NOTIFICATIONS, allowedRoles: ['super_admin', 'admin'] },
       { id: 'referrals', label: 'Referrals', icon: Gift, path: ROUTES.REFERRALS, allowedRoles: ['super_admin', 'admin'] },
+      { id: 'promo', label: 'Promo Campaigns', icon: Gift, path: ROUTES.PROMO, allowedRoles: ['super_admin', 'admin', 'financial_admin'] },
       { id: 'blog', label: 'Blog', icon: FileText, path: ROUTES.BLOG, allowedRoles: ['super_admin', 'admin', 'support', 'content_admin', 'analytics_admin'] },
     ],
   },
