@@ -234,20 +234,34 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                         )}
                       </div>
                     )}
-                    {userDetails.location && userDetails.location.city && (
+                    {userDetails.location && (
+                      userDetails.location.address ||
+                      userDetails.location.city ||
+                      userDetails.location.state ||
+                      userDetails.location.coordinates
+                    ) && (
                       <div className="flex items-start text-sm text-gray-600">
                         <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
                         <div>
                           {userDetails.location.address && <p>{userDetails.location.address}</p>}
-                          <p>
-                            {userDetails.location.city}, {userDetails.location.state}
-                            {userDetails.location.country && `, ${userDetails.location.country}`}
-                          </p>
-                          {userDetails.location.coordinates && (
-                            <p className="text-xs text-gray-400 mt-1">
-                              Coordinates: {userDetails.location.coordinates[1]}, {userDetails.location.coordinates[0]}
+                          {(userDetails.location.city || userDetails.location.state || userDetails.location.country) && (
+                            <p>
+                              {[
+                                userDetails.location.city,
+                                userDetails.location.state,
+                                userDetails.location.country,
+                              ]
+                                .filter(Boolean)
+                                .join(', ')}
                             </p>
                           )}
+                          {userDetails.location.coordinates &&
+                            userDetails.location.coordinates.length === 2 && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Coordinates: {userDetails.location.coordinates[1]},{' '}
+                                {userDetails.location.coordinates[0]}
+                              </p>
+                            )}
                         </div>
                       </div>
                     )}
@@ -529,6 +543,46 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ user, onClos
                           <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg">
                             {userDetails.vendorProfile.businessDescription}
                           </p>
+                        </div>
+                      )}
+
+                      {/* Business Location — full shop address (vendor's business, not
+                          the personal location shown at the top of the modal) */}
+                      {userDetails.vendorProfile.location && (
+                        userDetails.vendorProfile.location.address ||
+                        userDetails.vendorProfile.location.city ||
+                        userDetails.vendorProfile.location.coordinates
+                      ) && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">Business Location</p>
+                          <div className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg space-y-1">
+                            {userDetails.vendorProfile.location.address && (
+                              <div className="flex items-start">
+                                <MapPin className="w-4 h-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
+                                <p>{userDetails.vendorProfile.location.address}</p>
+                              </div>
+                            )}
+                            {(userDetails.vendorProfile.location.city ||
+                              userDetails.vendorProfile.location.state ||
+                              userDetails.vendorProfile.location.country) && (
+                              <p className="ml-6 text-gray-700">
+                                {[
+                                  userDetails.vendorProfile.location.city,
+                                  userDetails.vendorProfile.location.state,
+                                  userDetails.vendorProfile.location.country,
+                                ]
+                                  .filter(Boolean)
+                                  .join(', ')}
+                              </p>
+                            )}
+                            {userDetails.vendorProfile.location.coordinates &&
+                              userDetails.vendorProfile.location.coordinates.length === 2 && (
+                                <p className="ml-6 text-xs text-gray-500">
+                                  Coordinates: {userDetails.vendorProfile.location.coordinates[1]},{' '}
+                                  {userDetails.vendorProfile.location.coordinates[0]}
+                                </p>
+                              )}
+                          </div>
                         </div>
                       )}
 
