@@ -10,6 +10,7 @@ export enum WithdrawalStatus {
 // Withdrawal Interface
 export interface Withdrawal {
   _id: string;
+  // null when the user account has been deleted
   user: {
     _id: string;
     firstName: string;
@@ -20,7 +21,7 @@ export interface Withdrawal {
       businessName: string;
       businessPhone?: string;
     };
-  };
+  } | null;
   amount: number;
   bankName: string;
   accountNumber: string;

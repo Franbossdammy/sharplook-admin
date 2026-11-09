@@ -386,7 +386,7 @@ export const WithdrawalsPage: React.FC = () => {
                   (withdrawal) =>
                     !searchTerm ||
                     withdrawal.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    `${withdrawal.user.firstName} ${withdrawal.user.lastName}`
+                    `${withdrawal.user?.firstName ?? ''} ${withdrawal.user?.lastName ?? ''}`
                       .toLowerCase()
                       .includes(searchTerm.toLowerCase()) ||
                     withdrawal.accountNumber.includes(searchTerm) ||
@@ -401,7 +401,7 @@ export const WithdrawalsPage: React.FC = () => {
                       <p className="text-sm font-medium text-gray-900 line-clamp-1">
                         {withdrawal.reference}
                       </p>
-                      {withdrawal.user.vendorProfile?.businessName && (
+                      {withdrawal.user?.vendorProfile?.businessName && (
                         <p className="text-xs text-gray-600 mt-1 line-clamp-1">
                           {withdrawal.user.vendorProfile.businessName}
                         </p>
@@ -410,9 +410,11 @@ export const WithdrawalsPage: React.FC = () => {
 
                     <div className="col-span-2">
                       <p className="text-sm font-medium text-gray-900">
-                        {withdrawal.user.firstName} {withdrawal.user.lastName}
+                        {withdrawal.user
+                          ? `${withdrawal.user.firstName} ${withdrawal.user.lastName}`
+                          : 'Deleted user'}
                       </p>
-                      <p className="text-xs text-gray-600">{withdrawal.user.email}</p>
+                      <p className="text-xs text-gray-600">{withdrawal.user?.email ?? '—'}</p>
                     </div>
 
                     <div className="col-span-2">

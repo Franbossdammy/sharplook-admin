@@ -151,13 +151,15 @@ export const WithdrawalDetailsModal: React.FC<WithdrawalDetailsModalProps> = ({
                 Vendor
               </p>
               <p className="font-medium text-gray-900">
-                {withdrawal.user.firstName} {withdrawal.user.lastName}
+                {withdrawal.user
+                  ? `${withdrawal.user.firstName} ${withdrawal.user.lastName}`
+                  : 'Deleted user'}
               </p>
-              <p className="text-sm text-gray-600 mt-1">{withdrawal.user.email}</p>
-              {withdrawal.user.phone && (
+              <p className="text-sm text-gray-600 mt-1">{withdrawal.user?.email ?? '—'}</p>
+              {withdrawal.user?.phone && (
                 <p className="text-sm text-gray-600">{withdrawal.user.phone}</p>
               )}
-              {withdrawal.user.vendorProfile?.businessName && (
+              {withdrawal.user?.vendorProfile?.businessName && (
                 <div className="mt-2 pt-2 border-t border-gray-200">
                   <p className="text-xs text-gray-600">Business Name</p>
                   <p className="text-sm font-medium text-gray-900">

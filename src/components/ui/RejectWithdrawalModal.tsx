@@ -78,7 +78,9 @@ export const RejectWithdrawalModal: React.FC<RejectWithdrawalModalProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-red-700">Vendor</p>
                 <p className="text-sm text-gray-900">
-                  {withdrawal.user.firstName} {withdrawal.user.lastName}
+                  {withdrawal.user
+                    ? `${withdrawal.user.firstName} ${withdrawal.user.lastName}`
+                    : 'Deleted user'}
                 </p>
               </div>
               <div className="flex items-center justify-between">
