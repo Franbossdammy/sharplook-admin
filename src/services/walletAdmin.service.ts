@@ -24,7 +24,31 @@ export interface WalletTopUpResult {
   };
 }
 
+export interface CreditCheckResult {
+  cardPayments: {
+    reference: string;
+    amount: number;
+    paymentType: string | null;
+    paidAt: string;
+    booking: { _id: string; status: string; scheduledDate?: string } | null;
+    hasOrder: boolean;
+  }[];
+  manualCredits: {
+    _id: string;
+    reference: string;
+    amount: number;
+    description?: string;
+    createdAt: string;
+  }[];
+}
+
 export class WalletAdminService {
+  // Recent card payments + manual credits, so admins can see a user already paid before crediting
+  async getCreditCheck(userId: string): Promise<CreditCheckResult> {
+    const response: any = await apiService.get(`/payments/wallet/fund/credit-check/${userId}`);
+    return response.data || response;
+  }
+
   async creditWallet(payload: WalletTopUpPayload): Promise<WalletTopUpResult> {
     const response: any = await apiService.post(API_ENDPOINTS.WALLET_CREDIT, payload);
     return response.data || response;
