@@ -13,7 +13,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { userService } from '../services/user.service';
-import { walletAdminService, WalletTopUpResult } from '../services/walletAdmin.service';
+import { walletAdminService, WalletTopUpResult, CreditCheckResult } from '../services/walletAdmin.service';
 import { auditLogService } from '../services/auditLog.service';
 import type { AuditLog } from '../services/auditLog.service';
 import { User as UserType } from '../types';
@@ -37,6 +37,12 @@ export const WalletTopUpPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [lastResult, setLastResult] = useState<WalletTopUpResult | null>(null);
+
+  // Recent card payments for the selected user, shown before crediting
+  const [creditCheck, setCreditCheck] = useState<CreditCheckResult | null>(null);
+  const [creditCheckLoading, setCreditCheckLoading] = useState(false);
+  const [creditCheckFailed, setCreditCheckFailed] = useState(false);
+  const [paymentsReviewed, setPaymentsReviewed] = useState(false);
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [auditLoading, setAuditLoading] = useState(false);
@@ -84,16 +90,46 @@ export const WalletTopUpPage: React.FC = () => {
     }
   };
 
+  const loadCreditCheck = async (userId: string) => {
+    setCreditCheck(null);
+    setCreditCheckFailed(false);
+    setPaymentsReviewed(false);
+    setCreditCheckLoading(true);
+    try {
+      setCreditCheck(await walletAdminService.getCreditCheck(userId));
+    } catch {
+      setCreditCheckFailed(true);
+    } finally {
+      setCreditCheckLoading(false);
+    }
+  };
+
   const handleSelectUser = (user: UserType) => {
     setSelectedUser(user);
     setSearchResults([]);
     setSearchQuery('');
     setLastResult(null);
+    loadCreditCheck(user._id);
   };
+
+  const recentCardPayments = creditCheck?.cardPayments || [];
+  const enteredAmount = parseFloat(amount);
+  const matchingPayment = !isNaN(enteredAmount)
+    ? recentCardPayments.find((p) => p.amount === enteredAmount)
+    : undefined;
+  // A credit can't go through until the admin confirms they've checked the user's recent payments
+  const needsPaymentReview =
+    operationType === 'credit' &&
+    (creditCheckLoading || creditCheckFailed || recentCardPayments.length > 0) &&
+    !paymentsReviewed;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser || !amount || !description.trim()) return;
+    if (needsPaymentReview) {
+      showToast("Please review the user's recent card payments first", 'error');
+      return;
+    }
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
@@ -118,6 +154,7 @@ export const WalletTopUpPage: React.FC = () => {
       setLastResult(result);
       setAmount('');
       setDescription('');
+      loadCreditCheck(selectedUser._id);
       showToast(
         operationType === 'credit'
           ? `₦${numAmount.toLocaleString()} credited successfully`
@@ -279,11 +316,123 @@ export const WalletTopUpPage: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={() => { setSelectedUser(null); setLastResult(null); }}
+                onClick={() => { setSelectedUser(null); setLastResult(null); setCreditCheck(null); setPaymentsReviewed(false); }}
                 className="text-gray-400 hover:text-gray-600 text-xs underline"
               >
                 Change
               </button>
+            </div>
+          )}
+
+          {/* Recent card payments — shown so admins don't credit someone who already paid */}
+          {selectedUser && operationType === 'credit' && (
+            <div className="space-y-2">
+              {creditCheckLoading && (
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Loader className="w-3.5 h-3.5 animate-spin" />
+                  Checking this user's recent card payments...
+                </div>
+              )}
+
+              {creditCheckFailed && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+                  Couldn't load this user's recent payments. Check their bookings and payments
+                  manually before crediting.{' '}
+                  <button
+                    type="button"
+                    onClick={() => loadCreditCheck(selectedUser._id)}
+                    className="underline font-medium"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {creditCheck && recentCardPayments.length === 0 && (
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+                  No card payments from this user in the last 14 days.
+                </div>
+              )}
+
+              {recentCardPayments.length > 0 && (
+                <div className="bg-amber-50 border border-amber-300 rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-2 text-amber-900">
+                    <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-semibold">This user has paid by card recently</p>
+                      <p className="text-xs mt-0.5">
+                        If they say they paid but nothing happened, check the booking below
+                        first. Their payment may already have gone through.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {recentCardPayments.map((p) => (
+                      <div
+                        key={p.reference}
+                        className={`flex items-center justify-between gap-2 text-xs rounded-md px-2.5 py-1.5 ${
+                          matchingPayment?.reference === p.reference
+                            ? 'bg-red-100 text-red-900 font-medium'
+                            : 'bg-white text-gray-700'
+                        }`}
+                      >
+                        <span>
+                          {formatCurrency(p.amount)} · {formatDate(p.paidAt)}
+                          {p.paymentType ? ` · ${p.paymentType.replace(/_/g, ' ')}` : ''}
+                        </span>
+                        <span className="text-right">
+                          {p.booking
+                            ? `Booking ${p.booking.status.replace(/_/g, ' ')}`
+                            : p.hasOrder
+                            ? 'Order placed'
+                            : p.paymentType === 'wallet_funding'
+                            ? 'Added to wallet'
+                            : 'No booking linked'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {matchingPayment && (
+                    <p className="text-xs font-semibold text-red-700">
+                      The amount you entered matches a card payment this user already made.
+                    </p>
+                  )}
+
+                  {(creditCheck?.manualCredits.length ?? 0) > 0 && (
+                    <p className="text-xs text-amber-900">
+                      Already manually credited in the last 14 days:{' '}
+                      {creditCheck!.manualCredits
+                        .map((c) => `${formatCurrency(c.amount)} (${formatDate(c.createdAt)})`)
+                        .join(', ')}
+                    </p>
+                  )}
+
+                  <label className="flex items-start gap-2 text-xs text-amber-900 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={paymentsReviewed}
+                      onChange={(e) => setPaymentsReviewed(e.target.checked)}
+                      className="mt-0.5"
+                    />
+                    I've checked these payments. This credit is not for something they already paid for.
+                  </label>
+                </div>
+              )}
+
+              {creditCheckFailed && (
+                <label className="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={paymentsReviewed}
+                    onChange={(e) => setPaymentsReviewed(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  I've checked this user's payments manually.
+                </label>
+              )}
             </div>
           )}
 
@@ -321,7 +470,7 @@ export const WalletTopUpPage: React.FC = () => {
 
             <button
               type="submit"
-              disabled={submitting || !selectedUser}
+              disabled={submitting || !selectedUser || needsPaymentReview}
               className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 operationType === 'credit'
                   ? 'bg-green-600 hover:bg-green-700'
