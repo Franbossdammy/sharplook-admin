@@ -10,6 +10,8 @@ import type {
   DisputeAnalytics,
   ReferralAnalytics,
   AcquisitionAnalytics,
+  ActivityAnalytics,
+  ActivityQuery,
 } from '../types/analytics.types';
 
 export class AnalyticsService {
@@ -113,6 +115,38 @@ export class AnalyticsService {
       `${API_ENDPOINTS.ACQUISITION_ANALYTICS}${params.toString() ? '?' + params.toString() : ''}`
     );
     return response.data?.data || response.data || response;
+  }
+
+  /**
+   * Who is active / gone quiet (vendors or clients), with filtered list
+   */
+  async getActivityAnalytics(q: ActivityQuery): Promise<ActivityAnalytics> {
+    const params = this.activityParams(q);
+    const response = await apiService.get<any>(`${API_ENDPOINTS.ACTIVITY_ANALYTICS}?${params.toString()}`);
+    return response.data?.data || response.data || response;
+  }
+
+  /**
+   * CSV of the filtered activity list (all rows)
+   */
+  async exportActivityCSV(q: ActivityQuery): Promise<Blob> {
+    const params = this.activityParams(q);
+    params.append('format', 'csv');
+    return apiService.get<Blob>(`${API_ENDPOINTS.ACTIVITY_ANALYTICS}?${params.toString()}`, {
+      responseType: 'blob',
+    });
+  }
+
+  private activityParams(q: ActivityQuery): URLSearchParams {
+    const params = new URLSearchParams();
+    params.append('role', q.role);
+    if (q.bucket) params.append('bucket', q.bucket);
+    if (q.kyc) params.append('kyc', q.kyc);
+    if (q.search) params.append('search', q.search);
+    if (q.sort) params.append('sort', q.sort);
+    if (q.page) params.append('page', String(q.page));
+    if (q.limit) params.append('limit', String(q.limit));
+    return params;
   }
 
   /**

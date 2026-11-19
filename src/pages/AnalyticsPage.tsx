@@ -16,7 +16,9 @@ import {
   FileSpreadsheet,
   UserCheck,
   Megaphone,
+  Activity,
 } from 'lucide-react';
+import { ActivityTab } from '../components/analytics/ActivityTab';
 import { analyticsService } from '../services/analytics.service';
 import {
   UserAnalytics,
@@ -53,7 +55,8 @@ type TabType =
   | 'vendors'
   | 'disputes'
   | 'referrals'
-  | 'acquisition';
+  | 'acquisition'
+  | 'activity';
 
 const COLORS = ['#eb278d', '#f472b6', '#ec4899', '#db2777', '#be185d', '#9f1239'];
 
@@ -223,6 +226,7 @@ export const AnalyticsPage: React.FC = () => {
     { id: 'disputes' as TabType, label: 'Disputes', icon: MessageSquare },
     { id: 'referrals' as TabType, label: 'Referrals', icon: Gift },
     { id: 'acquisition' as TabType, label: 'Acquisition', icon: Megaphone },
+    { id: 'activity' as TabType, label: 'Activity', icon: Activity },
   ];
 
   const formatCurrency = (amount: number) => `₦${amount.toLocaleString()}`;
@@ -240,7 +244,7 @@ export const AnalyticsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
           <p className="text-gray-600 mt-1">Detailed insights and performance metrics</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className={`flex items-center gap-3 ${activeTab === 'activity' ? 'hidden' : ''}`}>
           <button
             onClick={() => setShowDateFilter(!showDateFilter)}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -259,7 +263,7 @@ export const AnalyticsPage: React.FC = () => {
       </div>
 
       {/* Date Filter */}
-      {showDateFilter && (
+      {showDateFilter && activeTab !== 'activity' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="flex items-center gap-4">
             <div className="flex-1">
@@ -320,8 +324,11 @@ export const AnalyticsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Activity tab manages its own data + filters */}
+      {activeTab === 'activity' && <ActivityTab />}
+
       {/* Loading State */}
-      {loading && (
+      {loading && activeTab !== 'activity' && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>

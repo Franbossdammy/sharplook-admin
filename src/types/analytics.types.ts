@@ -176,3 +176,49 @@ export interface DateRangeFilter {
   startDate?: string;
   endDate?: string;
 }
+// User activity (who is active / gone quiet)
+export type ActivityRole = 'vendor' | 'client';
+export type ActivityBucket = 'active7' | 'd7to30' | 'd30to90' | 'over90' | 'never';
+
+export interface ActivityRow {
+  _id: string;
+  name: string;
+  businessName: string | null;
+  email: string;
+  phone: string | null;
+  kycStatus: string | null;
+  status: string;
+  joinedAt: string | null;
+  lastActive: string | null;
+  lastLogin: string | null;
+  lastBookingAction: string | null;
+  lastMessage: string | null;
+  completedBookings: number;
+  bucket: ActivityBucket;
+}
+
+export interface ActivityAnalytics {
+  role: ActivityRole;
+  generatedAt: string;
+  summary: {
+    total: number;
+    active7: number;
+    active30: number;
+    inactive30: number;
+    inactive90: number;
+    loginOnlyInactive30: number;
+  };
+  buckets: Array<{ key: ActivityBucket; label: string; count: number }>;
+  verified: { total: number; quiet30: number } | null;
+  list: { items: ActivityRow[]; total: number; page: number; totalPages: number };
+}
+
+export interface ActivityQuery {
+  role: ActivityRole;
+  bucket?: ActivityBucket | '';
+  kyc?: string;
+  search?: string;
+  sort?: 'recent' | 'oldest';
+  page?: number;
+  limit?: number;
+}

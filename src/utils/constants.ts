@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
   DISPUTE_ANALYTICS: '/analytics/disputes',
   REFERRAL_ANALYTICS: '/analytics/referrals',
   ACQUISITION_ANALYTICS: '/analytics/acquisition',
+  ACTIVITY_ANALYTICS: '/analytics/activity',
   USER_DETAILS_ANALYTICS: '/analytics/users/details',
   EXPORT_USER_DATA: '/analytics/users/export',
   EXPORT_ANALYTICS: (type: string) => `/analytics/export/${type}`,
